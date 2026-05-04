@@ -12,10 +12,16 @@
             </div>
 
             <div class="mt-auto">
-              <p class="text-muted text-center auth-sub-text mx-auto">Let’s get you signed in. Enter your email and password to continue.</p>
+              <p class="text-muted text-center auth-sub-text mx-auto">
+                <!-- en francais -->
+                <!-- Connectez-vous. Entrez votre email et mot de passe pour continuer. -->
+                Connectez-vous. Entrez votre email et mot de passe pour continuer.
+              </p>
               <form class="mt-4">
                 <div class="mb-3">
                   <label for="userEmail" class="form-label">
+                    <!-- en francais -->
+                    <!--  Email address -->
                     Email address
                     <span class="text-danger">*</span>
                   </label>
@@ -27,7 +33,9 @@
 
                 <div class="mb-3">
                   <label for="userPassword" class="form-label">
-                    Password
+                    <!-- en francais -->
+                    <!-- Password -->
+                    Mot de passe
                     <span class="text-danger">*</span>
                   </label>
                   <div class="app-search">
@@ -39,7 +47,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <BFormCheckbox name="keep"> Keep me signed in </BFormCheckbox>
 
-                  <RouterLink to="/auth/split/reset-pass" class="text-decoration-underline link-offset-3 text-muted"> Forgot Password? </RouterLink>
+                  <RouterLink to="/auth/split/reset-pass" class="text-decoration-underline link-offset-3 text-muted">
+                    Forgot Password? </RouterLink>
                 </div>
 
                 <div class="d-grid">
@@ -50,7 +59,8 @@
 
             <p class="text-muted text-center mt-4 mb-0">
               New here?
-              <RouterLink to="/auth/split/sign-up" class="text-decoration-underline link-offset-3 fw-semibold"> Create an account </RouterLink>
+              <RouterLink to="/auth/split/sign-up" class="text-decoration-underline link-offset-3 fw-semibold"> Create
+                an account </RouterLink>
             </p>
 
             <p class="text-center text-muted mt-auto mb-0">
@@ -61,7 +71,8 @@
         </BCard>
       </BCol>
       <BCol>
-        <div class="h-100 position-relative card-side-img rounded-0 overflow-hidden" style="background-image: url(/images/auth.jpg)">
+        <div class="h-100 position-relative card-side-img rounded-0 overflow-hidden"
+          style="background-image: url(/images/auth.jpg)">
           <div class="p-4 card-img-overlay auth-overlay d-flex align-items-end justify-content-center" />
         </div>
       </BCol>

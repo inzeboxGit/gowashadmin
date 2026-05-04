@@ -10,36 +10,55 @@
             <div class="auth-brand text-center mb-4">
               <AuthLogo />
 
-              <p class="text-muted w-lg-75 mt-3 mx-auto">Let’s get you signed in. Enter your email and password to continue.</p>
+              <p class="text-muted w-lg-75 mt-3 mx-auto">
+                <!-- en francais -->
+                <!-- Connectez-vous. Entrez votre email et mot de passe pour continuer. -->
+                Connectez-vous. Entrez votre email et mot de passe pour continuer.
+              </p>
             </div>
 
             <BForm @submit.prevent="handleSubmit">
               <BAlert v-if="error" variant="danger" show>{{ error }}</BAlert>
 
               <div class="mb-3">
-                <label for="userEmail" class="form-label"> Email address <span class="text-danger">*</span> </label>
+                <label for="userEmail" class="form-label"> Adresse email <span class="text-danger">*</span> </label>
                 <BFormInput id="userEmail" v-model="form.email" type="email" placeholder="you@example.com" required />
               </div>
 
               <div class="mb-3">
-                <label for="userPassword" class="form-label"> Password <span class="text-danger">*</span> </label>
+                <label for="userPassword" class="form-label"> Mot de passe <span class="text-danger">*</span> </label>
                 <BFormInput id="userPassword" v-model="form.password" type="password" placeholder="••••••••" required />
               </div>
 
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <BFormCheckbox name="keepSignedIn"> Keep me signed in </BFormCheckbox>
+                <BFormCheckbox name="keepSignedIn">
+                  <!-- en francais -->
+                  <!-- Keep me signed in -->
+                  Garder la connexion
+                </BFormCheckbox>
 
-                <RouterLink to="/auth/reset-pass" class="text-decoration-underline link-offset-3 text-muted"> Forgot Password? </RouterLink>
+                <RouterLink to="/auth/reset-pass" class="text-decoration-underline link-offset-3 text-muted">
+                  <!-- en francais -->
+                  <!-- Forgot Password? -->
+                  Mot de passe oublié ?
+                </RouterLink>
               </div>
 
               <div class="d-grid">
-                <BButton type="submit" variant="primary" class="fw-semibold py-2" :disabled="loading"> Sign In </BButton>
+                <BButton type="submit" variant="primary" class="fw-semibold py-2" :disabled="loading"> Sign In
+                </BButton>
               </div>
             </BForm>
 
             <p class="text-muted text-center mt-4 mb-0">
-              New here?
-              <RouterLink to="/auth/sign-up" class="text-decoration-underline link-offset-3 fw-semibold"> Create an account </RouterLink>
+              <!-- en francais -->
+              <!-- New here? -->
+              Nouveau ici?
+              <RouterLink to="/auth/sign-up" class="text-decoration-underline link-offset-3 fw-semibold">
+                <!-- en francais -->
+                <!-- Create an account -->
+                Créer un compte
+              </RouterLink>
             </p>
           </BCard>
 
