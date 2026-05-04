@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isParticipant(data) {
+      return isSignedIn()
+          && (data.laveurId == request.auth.uid || data.clientId == request.auth.uid);
+    }
+
+    function isPublished(data) {
+      return data.published == true;
+    }
+    
+    /// --- Supers Functions ---
+    // function isSuper() {
+    //   return isSignedIn()
+    //     && exists(/databases/$(database)/documents/supers/$(request.auth.uid))
+    //     && get(/databases/$(database)/documents/supers/$(request.auth.uid)).data.role == "super";
+    // }
+    
+    match /supers/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // ---- Profil laveur: privé pour le pro.
+    match /laveurs/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+
+      match /services/{serviceId} {
+        allow create: if isOwner(userId)
+            && request.resource.data.laveurId == userId;
+        allow read: if isOwner(userId) || isPublished(resource.data);
+        allow update: if isOwner(userId)
+          && resource.data.laveurId == userId
+          && request.resource.data.laveurId == userId;
+        allow delete: if isOwner(userId)
+          && resource.data.laveurId == userId;
+      }
+
+      match /addons/{addonId} {
+        allow create: if isOwner(userId)
+            && request.resource.data.laveurId == userId;
+        allow read: if isOwner(userId) || isPublished(resource.data);
+        allow update: if isOwner(userId)
+          && resource.data.laveurId == userId
+          && request.resource.data.laveurId == userId;
+        allow delete: if isOwner(userId)
+          && resource.data.laveurId == userId;
+      }
+    }
+
+    // --- Profil public visible côté client, sans email ni téléphone.
+    match /pub_laveurs/{userId} {
+      allow read: if resource.data.isBanned != true;
+      allow write: if isOwner(userId);
+    }
+
+    // --- Compatibilité legacy pendant migration.
+    match /users/{userId} {
+      allow create, read, update, delete: if isOwner(userId);
+    }
+
+    // --- Réservations lisibles par le laveur concerné et le client concerné.
+    match /reservations/{reservationId} {
+      allow create: if isParticipant(request.resource.data);
+      allow read, update, delete: if isParticipant(resource.data);
+    }
+
+    // --- Paiements lisibles par le laveur concerné et le client concerné.
+    match /payments/{paymentId} {
+      allow create: if isParticipant(request.resource.data);
+      allow read, update, delete: if isParticipant(resource.data);
+    }
+
+    // --- Produits visibles côté client seulement s'ils sont publiés.
+    match /products/{productId} {
+      allow create: if isSignedIn()
+          && request.resource.data.laveurId == request.auth.uid;
+      allow read: if resource.data.published == true
+          || (isSignedIn() && resource.data.laveurId == request.auth.uid);
+      allow update: if isSignedIn()
+        && resource.data.laveurId == request.auth.uid
+        && request.resource.data.laveurId == request.auth.uid;
+      allow delete: if isSignedIn()
+        && resource.data.laveurId == request.auth.uid;
+    }
+  }
+}
