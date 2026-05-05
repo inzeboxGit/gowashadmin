@@ -94,12 +94,12 @@ export const allRoutes = [
             meta: { title: 'Cart' },
             component: () => import('~/views/admin/apps/ecommerce/cart/index.vue')
         },
-        // {
-        //     path: '/apps/ecommerce/categories',
-        //     name: 'apps.ecommerce.categories',
-        //     meta: { title: 'Categories' },
-        //     component: () => import('~/views/admin/apps/ecommerce/categories/index.vue')
-        // },
+        {
+            path: '/apps/ecommerce/categories',
+            name: 'apps.ecommerce.categories',
+            meta: { title: 'Categories' },
+            component: () => import('~/views/admin/apps/ecommerce/categories/index.vue')
+        },
         {
             path: '/apps/ecommerce/brands',
             name: 'apps.ecommerce.brands',
@@ -137,7 +137,13 @@ export const allRoutes = [
             component: () => import('~/views/admin/apps/ecommerce/products/product-add/index.vue')
         },
         {
-            path: '/apps/ecommerce/product-details',
+            path: '/apps/ecommerce/product-edit/:id',
+            name: 'apps.ecommerce.product-edit',
+            meta: { title: 'Product edit' },
+            component: () => import('~/views/admin/apps/ecommerce/products/product-edit/index.vue')
+        },
+        {
+            path: '/apps/ecommerce/product-details/:id',
             name: 'apps.ecommerce.product-details',
             meta: { title: 'Product details' },
             component: () => import('~/views/admin/apps/ecommerce/products/product-details/index.vue')

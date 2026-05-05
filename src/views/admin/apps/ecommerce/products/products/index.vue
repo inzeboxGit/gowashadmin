@@ -11,19 +11,19 @@
         <BCardHeader class="border-light justify-content-between">
           <div class="d-flex gap-2">
             <div class="app-search">
-              <input type="search" class="form-control" placeholder="Search product name..." v-model="searchQuery" />
+              <input type="search" class="form-control" placeholder="Rechercher un produit..." v-model="searchQuery" />
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
-            <BButton v-if="selected.length" variant="danger" @click="handleDeleteSelected"> Delete </BButton>
+            <BButton v-if="selected.length" variant="danger" @click="handleDeleteSelected"> Supprimer </BButton>
           </div>
 
           <div class="d-flex align-items-center gap-2">
-            <span class="me-2 fw-semibold">Filter By:</span>
+            <span class="me-2 fw-semibold">Filtrer par:</span>
 
             <div class="app-search">
               <BFormSelect v-model="category" class="form-control my-1 my-md-0">
-                <option value="All">Category</option>
+                <option value="All">Catégorie</option>
                 <option v-for="item in categories" :key="item" :value="item">{{ item }}</option>
               </BFormSelect>
               <Icon icon="tag" class="app-search-icon text-muted" />
@@ -32,17 +32,17 @@
             <div class="app-search">
 
               <BFormSelect v-model="status" class="form-control my-1 my-md-0">
-                <option value="All">Status</option>
-                <option value="Published">Published</option>
-                <option value="Pending">Pending</option>
-                <option value="Out Of Stock">Out of Stock</option>
+                <option value="All">Statut</option>
+                <option value="Published">Publié</option>
+                <option value="Pending">En attente</option>
+                <option value="Out Of Stock">Rupture de stock</option>
               </BFormSelect>
               <Icon icon="activity" class="app-search-icon text-muted" />
             </div>
 
             <div class="app-search">
               <BFormSelect v-model="priceRange" class="form-control my-1 my-md-0">
-                <option value="All">Price Range</option>
+                <option value="All">Plage de prix</option>
                 <option value="0-50">0 - 50</option>
                 <option value="51-150">51 - 150</option>
                 <option value="151-500">151 - 500</option>
@@ -64,8 +64,13 @@
               <Icon icon="list-check" class="fs-lg" />
             </RouterLink>
             <RouterLink to="/apps/ecommerce/product-add" class="btn btn-danger ms-1">
-              <Icon icon="plus" class="fs-sm me-2" /> Add Product
+              <Icon icon="plus" class="fs-sm me-2" /> Ajouter Produit
             </RouterLink>
+            <!-- <BButton variant="warning" class="ms-1" :disabled="importing" @click="handleImportSeed">
+              <BSpinner v-if="importing" small class="me-2" />
+              <Icon v-else icon="upload" class="fs-sm me-2" />
+              Import catalogue
+            </BButton> -->
           </div>
         </BCardHeader>
 
@@ -103,7 +108,7 @@
               </div>
               <div>
                 <h5 class="mb-1">
-                  <RouterLink to="/apps/ecommerce/product-details" class="link-reset">{{ data.item.name }} </RouterLink>
+                  <RouterLink :to="`/apps/ecommerce/product-details/${data.item.id}`" class="link-reset">{{ data.item.name }} </RouterLink>
                 </h5>
                 <p class="text-muted mb-0 fs-xxs">by: {{ data.item.brand }}</p>
               </div>
@@ -134,7 +139,7 @@
 
           <template #cell(action)="{ item }">
             <div class="d-flex justify-content-center gap-1">
-              <BButton size="sm" class="btn-default btn-icon rounded-circle">
+              <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="router.push(`/apps/ecommerce/product-details/${item.id}`)">
                 <Icon icon="eye" class="fs-lg" />
               </BButton>
               <BButton size="sm" class="btn-default btn-icon rounded-circle">
@@ -159,14 +164,15 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router"
 import { useRoute, useRouter } from 'vue-router'
-import { BAlert, BButton, BCard, BCardHeader, BCol, BFormSelect, BRow, BSpinner, BTable } from 'bootstrap-vue-next'
+import { BAlert, BButton, BCard, BCardFooter, BCardHeader, BCol, BFormSelect, BRow, BSpinner, BTable } from 'bootstrap-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import Rating from '~/components/Rating.vue'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
-import { getProducts } from '~/services/products.service'
+import { bulkImportProducts, getProducts } from '~/services/products.service'
+import { productsSeed } from '~/data/products-seed'
 import { toPascalCase } from '~/utils/helpers'
 import type { Product } from '~/types/product'
 
@@ -215,6 +221,7 @@ const perPage = ref(8)
 const totalRows = ref(0)
 const products = ref<ProductTableItem[]>([])
 const loading = ref(false)
+const importing = ref(false)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 const route = useRoute()
@@ -283,6 +290,23 @@ const mapProductToTableItem = (product: Product): ProductTableItem => {
     status: product.published ? 'published' : 'pending',
     date: publishedDate.date,
     time: publishedDate.time,
+  }
+}
+
+const handleImportSeed = async () => {
+  if (!confirm(`Importer ${productsSeed.length} produits dans la collection ? Cette action ne peut pas être annulée.`)) return
+
+  try {
+    importing.value = true
+    error.value = null
+    await bulkImportProducts(productsSeed)
+    successMessage.value = `${productsSeed.length} produits importés avec succès.`
+    await loadProducts()
+  } catch (err) {
+    console.error('[products] Import failed', err)
+    error.value = err instanceof Error ? err.message : "Erreur lors de l'import."
+  } finally {
+    importing.value = false
   }
 }
 

@@ -1,7 +1,9 @@
 <template>
   <div class="d-flex align-items-center justify-content-between">
     <div>
-      <span class="badge bg-success-subtle text-success px-2 py-1 fs-base rounded-pill">In Stock</span>
+      <span :class="['badge px-2 py-1 fs-base rounded-pill', product.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary']">
+        {{ product.published ? 'Publié' : 'Non publié' }}
+      </span>
     </div>
     <div class="flex-grow-1 d-inline-flex align-items-center justify-content-end fs-lg">
       <Icon icon="star" class="text-warning" />
@@ -9,70 +11,65 @@
       <Icon icon="star" class="text-warning" />
       <Icon icon="star" class="text-warning" />
       <Icon icon="star" class="text-warning" />
-      <span class="ms-1 fs-base"><RouterLink to="/apps/ecommerce/reviews" class="link-reset fw-medium">(859 Reviews)</RouterLink> </span>
+      <span class="ms-1 fs-base fw-medium">(0 avis)</span>
     </div>
   </div>
   <div class="mt-3 mb-4">
-    <h4 class="fs-xl">Apple iMac 24” M3 Chip – 4.5K Retina Display</h4>
+    <h4 class="fs-xl">{{ product.title }}</h4>
   </div>
 
   <BRow class="mb-4">
     <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">SKU:</h6>
-      <p class="fw-medium mb-0">IMAC-M3-24</p>
+      <h6 class="mb-1 text-muted text-uppercase">Référence :</h6>
+      <p class="fw-medium mb-0">{{ product.reference || '—' }}</p>
     </BCol>
     <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">Category:</h6>
-      <p class="fw-medium mb-0">Computers</p>
+      <h6 class="mb-1 text-muted text-uppercase">Catégorie :</h6>
+      <p class="fw-medium mb-0">{{ product.category }}</p>
     </BCol>
     <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">Stock:</h6>
-      <p class="fw-medium mb-0">67</p>
+      <h6 class="mb-1 text-muted text-uppercase">Stock :</h6>
+      <p class="fw-medium mb-0">{{ product.stock ?? '—' }}</p>
     </BCol>
     <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">Published:</h6>
-      <p class="fw-medium mb-0">12 Jul, 2025 <small class="text-muted">09:00 AM</small></p>
+      <h6 class="mb-1 text-muted text-uppercase">Publié le :</h6>
+      <p class="fw-medium mb-0">{{ new Date(product.createdAt).toLocaleDateString('fr-FR') }}</p>
     </BCol>
   </BRow>
 
   <BRow class="mb-4">
     <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">Orders:</h6>
-      <p class="fw-medium mb-0">1,428</p>
+      <h6 class="mb-1 text-muted text-uppercase">Marque :</h6>
+      <p class="fw-medium mb-0">{{ product.brandName }}</p>
     </BCol>
-    <BCol md="4" xl="3">
-      <h6 class="mb-1 text-muted text-uppercase">Revenue:</h6>
-      <p class="fw-medium mb-0">$2,350,120.00</p>
+    <BCol v-if="product.condition" md="4" xl="3">
+      <h6 class="mb-1 text-muted text-uppercase">État :</h6>
+      <p class="fw-medium mb-0">{{ product.condition }}</p>
+    </BCol>
+    <BCol v-if="product.size" md="4" xl="3">
+      <h6 class="mb-1 text-muted text-uppercase">Taille :</h6>
+      <p class="fw-medium mb-0">{{ product.size }}</p>
     </BCol>
   </BRow>
 
   <h3 class="text-muted d-flex align-items-center gap-2 mb-4">
-    <small class="text-decoration-line-through">$1,499.00</small>
-    <span class="fw-bold text-danger">$1,299.00</span>
-    <small>(13%)</small>
+    <small v-if="product.oldPrice" class="text-decoration-line-through">{{ product.oldPrice.toFixed(2) }} €</small>
+    <span class="fw-bold text-danger">{{ product.price.toFixed(2) }} €</span>
+    <small v-if="product.discount">({{ product.discount }}%)</small>
   </h3>
 
-  <h5 class="text-uppercase text-muted fs-xs mb-2">Product Info:</h5>
+  <h5 class="text-uppercase text-muted fs-xs mb-2">Description :</h5>
+  <p>{{ product.description }}</p>
 
-  <p>The Apple iMac 24” with the M3 chip redefines performance and design. Featuring a stunning 4.5K Retina display, ultra-fast processing, and a sleek aluminum chassis in multiple colors, it’s perfect for creatives and professionals alike.</p>
-  <p>Enjoy seamless performance with macOS, optimized apps, and powerful memory — all in an all-in-one setup that fits any workspace.</p>
-
-  <h6 class="mt-3 fs-base">Details :</h6>
-  <ul class="d-flex flex-column gap-1 mb-3">
-    <li>24” 4.5K Retina Display with True Tone.</li>
-    <li>Apple M3 chip with 8-core CPU and 10-core GPU.</li>
-    <li>8GB unified memory (configurable to 24GB).</li>
-    <li>512GB SSD storage (configurable up to 2TB).</li>
-    <li>Color-matched Magic Keyboard and Mouse.</li>
-  </ul>
-
-  <RouterLink to="" class="link-primary fw-semibold">Read More...</RouterLink>
+  <a v-if="product.productUrl" :href="product.productUrl" target="_blank" rel="noopener noreferrer" class="link-primary fw-semibold">Voir sur le site...</a>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from "vue-router"
 import { BCol, BRow } from 'bootstrap-vue-next'
+import type { Product } from '~/types/product'
 import Icon from '~/components/wrappers/Icon.vue'
+
+defineProps<{ product: Product }>()
 </script>
 
 <style scoped></style>

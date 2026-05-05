@@ -31,8 +31,36 @@
 
                 <BCol lg="6">
                   <div class="mb-3">
+                    <label for="reference" class="form-label"> Référence </label>
+                    <BFormInput id="reference" v-model="form.reference" type="text" placeholder="Ex: DW-001" />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
                     <label for="stockNumber" class="form-label"> Stock <span class="text-danger">*</span> </label>
                     <BFormInput id="stockNumber" v-model.number="form.stock" type="number" placeholder="250" />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
+                    <label for="condition" class="form-label"> État / Condition </label>
+                    <BFormInput id="condition" v-model="form.condition" type="text" placeholder="Ex: Neuf, Reconditionnée" />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
+                    <label for="size" class="form-label"> Taille / Contenance </label>
+                    <BFormInput id="size" v-model="form.size" type="text" placeholder="Ex: 1L, 5kg" />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
+                    <label for="productUrl" class="form-label"> Lien produit </label>
+                    <BFormInput id="productUrl" v-model="form.productUrl" type="url" placeholder="https://..." />
                   </div>
                 </BCol>
 
@@ -199,6 +227,10 @@ const form = ref({
   discount: 0,
   brandName: '',
   images: [] as File[],
+  reference: '',
+  condition: '',
+  size: '',
+  productUrl: '',
 })
 
 const selectedCategory = computed(() => (category.value === 'All' ? '' : category.value))
@@ -230,6 +262,10 @@ const resetForm = () => {
     discount: 0,
     brandName: '',
     images: [],
+    reference: '',
+    condition: '',
+    size: '',
+    productUrl: '',
   }
   category.value = 'All'
   status.value = 'All'
@@ -268,6 +304,10 @@ const handleCreateProduct = async (published: boolean) => {
       oldPrice: Number(form.value.discount || 0) > 0 ? Number(form.value.price) : 0,
       price: Number(form.value.price),
       published,
+      reference: form.value.reference.trim() || undefined,
+      condition: form.value.condition.trim() || undefined,
+      size: form.value.size.trim() || undefined,
+      productUrl: form.value.productUrl.trim() || undefined,
       stock: Number(form.value.stock || 0),
     })
 

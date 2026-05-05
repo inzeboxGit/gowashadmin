@@ -51,22 +51,22 @@ export const menuItems: MenuItemType[] = [
               {
                 'url': '/apps/ecommerce/products',
                 'slug': 'pages:apps-ecommerce-products',
-                'label': 'Produits',
+                'label': 'Liste des Produits',
               },
-              {
-                'url': '/apps/ecommerce/products-grid',
-                'slug': 'pages:apps-ecommerce-products-grid',
-                'label': 'Products Grid',
-              },
-              {
-                'url': '/apps/ecommerce/product-details',
-                'slug': 'pages:apps-ecommerce-product-details',
-                'label': 'Product Details',
-              },
+              // {
+              //   'url': '/apps/ecommerce/products-grid',
+              //   'slug': 'pages:apps-ecommerce-products-grid',
+              //   'label': 'Products Grid',
+              // },
+              // {
+              //   'url': '/apps/ecommerce/product-details',
+              //   'slug': 'pages:apps-ecommerce-product-details',
+              //   'label': 'Product Details',
+              // },
               {
                 'url': '/apps/ecommerce/product-add',
                 'slug': 'pages:apps-ecommerce-product-add',
-                'label': 'Add Product',
+                'label': 'Ajouter Produit',
               },
             ],
           },
@@ -74,20 +74,20 @@ export const menuItems: MenuItemType[] = [
             'url': '/apps/ecommerce/categories',
             'icon': 'layout-grid',
             'slug': 'pages:apps-ecommerce-categories',
-            'label': 'Categories',
+            'label': 'Catégories',
           },
           {
             'url': '/apps/ecommerce/brands',
             'icon': 'badge-check',
             'slug': 'pages:apps-ecommerce-brands',
-            'label': 'Brands',
+            'label': 'Marques',
           },
           
           // {
           //   'url': '/apps/ecommerce/customers',
           //   'icon': 'users',
           //   'slug': 'pages:apps-ecommerce-customers',
-          //   'label': 'Customers',
+          //   'label': 'Clients',
           // },
           // {
           //   'url': '/apps/ecommerce/cart',

@@ -1,0 +1,384 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+Future<void> seedGoWashProducts(FirebaseFirestore firestore) async {
+  final CollectionReference productsRef = firestore.collection('products');
+  
+  // Données extraites du fichier catalogue produits gowash.xlsx
+  final List<Map<String, dynamic>> products = [
+    // De Witte - Microfibres - Vitres (Prix non disponible)
+    {
+      'brandName': 'De Witte',
+      'reference': '601.400.004',
+      'title': 'Top-Vitres bleue REGULAR',
+      'description': 'Microfibre spéciale vitres. Sans traces ni particules. Biface : côté MAT pour appliquer le produit, côté BRILLANT pour finir. S\'utilise avec eau ou produit vitre. +200 lavages machine.',
+      'size': '40 x 40 cm',
+      'weight': '320 g/m²',
+      'condition': '',
+      'price': 0,
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Microfibres - Vitres',
+      'imageUrl': 'https://cdn.webshopapp.com/shops/247244/files/164088923/410x410x2/top-vitres-bleue-40-x-40-cm-regular.jpg',
+      'productUrl': 'https://www.dewitte.com/fr/top-vitres-bleue-40-x-40-cm-regular.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // STARC 2000 - 5L
+    {
+      'brandName': 'STARC',
+      'reference': '20200005_5L',
+      'title': 'STARC 2000 - Dégraissant concentré sièges/moquettes 5L',
+      'description': 'Nettoyant dégraissant concentré ultra-efficace pour habitacle complet. Diluer entre 5 et 10%. Sans rinçage. Fabrication française. Dangereux transport ADR.',
+      'size': '',
+      'weight': '5,5 kg',
+      'condition': 'Bidon 5 L',
+      'price': 49.81, // 49,81 € TTC -> en centimes
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Dégraissants',
+      'imageUrl': 'https://www.lavagesanseau.com/3283-large_default/sieges-moquettes-concentre-produit-degraissant.jpg',
+      'productUrl': 'https://www.lavagesanseau.com/degraissants-bases-concentrees/4673-4856-sieges-moquettes-concentre-produit-degraissant.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // STARC 2000 - 30L
+    {
+      'brandName': 'STARC',
+      'reference': '20200005_30L',
+      'title': 'STARC 2000 - Dégraissant concentré sièges/moquettes 30L',
+      'description': 'Nettoyant dégraissant concentré ultra-efficace pour habitacle complet. Diluer entre 5 et 10%. Sans rinçage. Fabrication française. Dangereux transport ADR.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 30 L',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Dégraissants',
+      'imageUrl': 'https://www.lavagesanseau.com/3283-large_default/sieges-moquettes-concentre-produit-degraissant.jpg',
+      'productUrl': 'https://www.lavagesanseau.com/degraissants-bases-concentrees/4673-4856-sieges-moquettes-concentre-produit-degraissant.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // DIAMOND NET - 2L
+    {
+      'brandName': 'STARC',
+      'reference': '10150002_2L',
+      'title': 'DIAMOND NET - Nettoyant carrosserie sans eau 2L',
+      'description': 'Nettoyant carrosserie sans eau 3 en 1 : nettoie, fait briller et protège. N°1 L\'Argus depuis 2008. Prêt à l\'emploi. Biodégradable. Fabrication française.',
+      'size': '',
+      'weight': '2,4 kg',
+      'condition': 'Bidon 2 L',
+      'price': 24.60, // 24,60 € TTC -> en centimes
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Carrosserie',
+      'imageUrl': 'https://www.lavagesanseau.com/2692-large_default/diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.jpg',
+      'productUrl': 'https://www.lavagesanseau.com/gamme-exterieure/4021-5446-diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // DIAMOND NET - 5L
+    {
+      'brandName': 'STARC',
+      'reference': '10150002_5L',
+      'title': 'DIAMOND NET - Nettoyant carrosserie sans eau 5L',
+      'description': 'Nettoyant carrosserie sans eau 3 en 1 : nettoie, fait briller et protège. N°1 L\'Argus depuis 2008. Prêt à l\'emploi. Biodégradable. Fabrication française.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 5 L',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Carrosserie',
+      'imageUrl': 'https://www.lavagesanseau.com/2692-large_default/diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.jpg',
+      'productUrl': 'https://www.lavagesanseau.com/gamme-exterieure/4021-5446-diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // DIAMOND NET - 20L
+    {
+      'brandName': 'STARC',
+      'reference': '10150002_20L',
+      'title': 'DIAMOND NET - Nettoyant carrosserie sans eau 20L',
+      'description': 'Nettoyant carrosserie sans eau 3 en 1 : nettoie, fait briller et protège. N°1 L\'Argus depuis 2008. Prêt à l\'emploi. Biodégradable. Fabrication française.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 20 L',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Carrosserie',
+      'imageUrl': 'https://www.lavagesanseau.com/2692-large_default/diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.jpg',
+      'productUrl': 'https://www.lavagesanseau.com/gamme-exterieure/4021-5446-diamond-net-nettoyant-carrosserie-sans-eau-du-2-litres-au-20-litres.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Wheel Cleaner - 2L
+    {
+      'brandName': 'STARC',
+      'reference': '10910002_2L',
+      'title': 'Wheel Cleaner - Nettoyant jantes/enjoliveurs 2L',
+      'description': 'Nettoyant dégraissant pour toutes jantes et enjoliveurs.',
+      'size': '',
+      'weight': '2,4 kg',
+      'condition': 'Bidon 2 L',
+      'price': 24.46, // 24,46 € TTC -> en centimes
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Jantes',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/4241-4242-wheel-cleaner-nettoyant-jantes-enjoliveurs-nettoyant-degraissant-toutes-jantes.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Wheel Cleaner - 5L
+    {
+      'brandName': 'STARC',
+      'reference': '10910002_5L',
+      'title': 'Wheel Cleaner - Nettoyant jantes/enjoliveurs 5L',
+      'description': 'Nettoyant dégraissant pour toutes jantes et enjoliveurs.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 5 L',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Jantes',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/4241-4242-wheel-cleaner-nettoyant-jantes-enjoliveurs-nettoyant-degraissant-toutes-jantes.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Wheel Cleaner - 20L
+    {
+      'brandName': 'STARC',
+      'reference': '10910002_20L',
+      'title': 'Wheel Cleaner - Nettoyant jantes/enjoliveurs 20L',
+      'description': 'Nettoyant dégraissant pour toutes jantes et enjoliveurs.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 20 L',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Jantes',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/4241-4242-wheel-cleaner-nettoyant-jantes-enjoliveurs-nettoyant-degraissant-toutes-jantes.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Perfect Tire - 2L
+    {
+      'brandName': 'STARC',
+      'reference': '10090002_2L',
+      'title': 'Perfect Tire - Brillant pneus durable 2L',
+      'description': 'Brillant pneus pour faire briller durablement le flanc des pneus.',
+      'size': '',
+      'weight': '2,4 kg',
+      'condition': 'Bidon 2 L',
+      'price': 43.81, // 43,81 € TTC -> en centimes
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Pneus',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/3931-3932-perfect-tire-brillant-pneus-faire-briller-durablement-le-flanc-des-pneus.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Perfect Tire - 5L
+    {
+      'brandName': 'STARC',
+      'reference': '10090002_5L',
+      'title': 'Perfect Tire - Brillant pneus durable 5L',
+      'description': 'Brillant pneus pour faire briller durablement le flanc des pneus.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 5 L',
+      'price': 0, // Prix non spécifié dans le fichier
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Pneus',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/3931-3932-perfect-tire-brillant-pneus-faire-briller-durablement-le-flanc-des-pneus.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Perfect Tire - 20L
+    {
+      'brandName': 'STARC',
+      'reference': '10090002_20L',
+      'title': 'Perfect Tire - Brillant pneus durable 20L',
+      'description': 'Brillant pneus pour faire briller durablement le flanc des pneus.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 20 L',
+      'price': 0, // Prix non spécifié dans le fichier
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Pneus',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/nettoyage-des-jantes-et-brillance-pneus/3931-3932-perfect-tire-brillant-pneus-faire-briller-durablement-le-flanc-des-pneus.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // STARC SC - 5L
+    {
+      'brandName': 'STARC',
+      'reference': '20220005_5L',
+      'title': 'STARC SC - Shampooing carrosserie 5L',
+      'description': 'Shampooing carrosserie concentré.',
+      'size': '',
+      'weight': '5,5 kg',
+      'condition': 'Bidon 5 L',
+      'price': 47.29, // 47,29 € TTC -> en centimes
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Carrosserie',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/degraissants-bases-concentrees/4147-4148-starc-sc-shampoing-carrosserie.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // STARC SC - 30L
+    {
+      'brandName': 'STARC',
+      'reference': '20220005_30L',
+      'title': 'STARC SC - Shampooing carrosserie 30L',
+      'description': 'Shampooing carrosserie concentré.',
+      'size': '',
+      'weight': '',
+      'condition': 'Bidon 30 L',
+      'price': 0, // Prix non spécifié dans le fichier
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Carrosserie',
+      'imageUrl': '',
+      'productUrl': 'https://www.lavagesanseau.com/degraissants-bases-concentrees/4147-4148-starc-sc-shampoing-carrosserie.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Virtus - Polisseuse orbitale 21mm
+    {
+      'brandName': 'Virtus',
+      'reference': '700.1150.21',
+      'title': 'Polisseuse orbitale 21mm - 700-21',
+      'description': 'Polisseuse orbitale professionnelle orbit 21mm. Faibles vibrations, coupe rapide. Plateau Ø 150mm, tampons max 180mm.',
+      'size': 'Orbit 21 mm',
+      'weight': '',
+      'condition': '',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Matériel - Polissage',
+      'imageUrl': 'https://www.allchem.it/images/2052360.png',
+      'productUrl': 'https://www.allchem.it/en/700-21.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Virtus - Polisseuse orbitale 15mm
+    {
+      'brandName': 'Virtus',
+      'reference': '700.1135.15',
+      'title': 'Polisseuse orbitale 15mm - 700-15',
+      'description': 'Polisseuse orbitale professionnelle orbit 15mm. Faibles vibrations, coupe rapide. Plateau Ø 150mm, tampons max 180mm.',
+      'size': 'Orbit 15 mm',
+      'weight': '',
+      'condition': '',
+      'price': 0, // Non disponible
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Matériel - Polissage',
+      'imageUrl': 'https://www.allchem.it/images/2052360.png',
+      'productUrl': 'https://www.allchem.it/en/700-15.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Gamme Polishes & Compounds (produit info catalogue)
+    {
+      'brandName': 'Virtus',
+      'reference': 'allchem_polishes_compounds',
+      'title': 'Gamme Polishes & Compounds Allchem',
+      'description': 'Gamme complète de pâtes et gels abrasifs : 413 (extra mordant), 426 (médium), 433 (fin), 472 (ultrafin), 487 UHD, 497 5en1, 453 Polish protecteur, etc. Prix et formats variables selon référence.',
+      'size': 'Divers formats',
+      'weight': '',
+      'condition': '',
+      'price': 0, // Variable selon référence
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Produits - Polissage',
+      'imageUrl': '',
+      'productUrl': 'https://www.allchem.it/en/Polishes-and-Compounds.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+    // Gamme Tampons / Pads Allchem
+    {
+      'brandName': 'Virtus',
+      'reference': 'allchem_pads',
+      'title': 'Gamme Tampons / Pads Allchem',
+      'description': 'Gamme complète de tampons de polissage : 360 (laine), 351 (micro-réservoirs), 354 (orbital fin), 359 (microfibre), 347, 352 extreme, etc. Compatible orbitale et rotative.',
+      'size': 'Divers tailles',
+      'weight': '',
+      'condition': '',
+      'price': 0, // Variable selon référence
+      'oldPrice': 0,
+      'discount': 0,
+      'category': 'Accessoires - Tampons',
+      'imageUrl': '',
+      'productUrl': 'https://www.allchem.it/en/tamponi.html',
+      'laveurId': '3cixGBQWhlXSrDqMtzEhfFQgwua2',
+      'published': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    },
+  ];
+
+  // Insertion des produits dans Firestore
+  for (final product in products) {
+    try {
+      // Génération d'un ID unique basé sur la référence
+      final String docId = 'product_${product['reference']}'.replaceAll('.', '_').replaceAll('/', '_');
+      
+      await productsRef.doc(docId).set(product);
+      print('✅ Produit ajouté : ${product['title']}');
+    } catch (e) {
+      print('❌ Erreur pour ${product['title']} : $e');
+    }
+  }
+  
+  print('🎉 Seed terminé ! ${products.length} produits ajoutés.');
+}
