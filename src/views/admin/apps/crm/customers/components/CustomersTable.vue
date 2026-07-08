@@ -3,35 +3,40 @@
     <BCardHeader class="border-light justify-content-between">
       <div class="d-flex gap-2">
         <div class="app-search">
-          <BFormInput v-model="searchQuery" type="search" placeholder="Search customers..." />
+          <BFormInput v-model="searchQuery" type="search" placeholder="Rechercher un client..." />
           <Icon icon="search" class="app-search-icon text-muted" />
         </div>
 
-        <BButton variant="primary" @click="showAddModal = true"> <Icon icon="plus" class="me-1" /> New Customer </BButton>
-
-        <BButton v-if="selectedRows.length" variant="danger" @click="deleteSelected"> Delete </BButton>
+        <BButton v-if="selectedRows.length" variant="danger" @click="deleteSelected"> Supprimer </BButton>
       </div>
 
       <div class="d-flex align-items-center gap-2">
-        <span class="me-2 fw-semibold">Filter By:</span>
+        <span class="me-2 fw-semibold">Filtrer par:</span>
 
         <div class="app-search">
-          <BFormSelect v-model="filterCountry" class="form-control my-1 my-md-0">
-            <option value="">Country</option>
-            <option v-for="c in uniqueCountries" :key="c" :value="c">{{ c }}</option>
+          <BFormSelect v-model="filterCity" class="form-control my-1 my-md-0">
+            <option value="">Ville</option>
+            <option v-for="c in uniqueCities" :key="c" :value="c">{{ c }}</option>
           </BFormSelect>
-          <Icon icon="earth" class="app-search-icon text-muted" />
+          <Icon icon="map-pin" class="app-search-icon text-muted" />
         </div>
 
         <div class="app-search">
-          <BFormSelect v-model="filterStatus" class="form-control my-1 my-md-0">
-            <option value="">Account Status</option>
-            <option value="active">Active</option>
-            <option value="verification-pending">Verification Pending</option>
-            <option value="inactive">Inactive</option>
-            <option value="blocked">Blocked</option>
+          <BFormSelect v-model="filterVerified" class="form-control my-1 my-md-0">
+            <option value="">Statut</option>
+            <option value="verified">Vérifié</option>
+            <option value="not-verified">Non vérifié</option>
           </BFormSelect>
-          <Icon icon="shuffle" class="app-search-icon text-muted" />
+          <Icon icon="shield-check" class="app-search-icon text-muted" />
+        </div>
+
+        <div class="app-search">
+          <BFormSelect v-model="filterGender" class="form-control my-1 my-md-0">
+            <option value="">Genre</option>
+            <option value="Homme">Homme</option>
+            <option value="Femme">Femme</option>
+          </BFormSelect>
+          <Icon icon="users" class="app-search-icon text-muted" />
         </div>
 
         <div>
@@ -44,8 +49,8 @@
       hover
       responsive
       show-empty
-      empty-text="No customers found."
-      :items="filteredCustomers"
+      empty-text="Aucun client trouvé."
+      :items="filteredClients"
       :fields="fields"
       v-model:selected-rows="selectedRows"
       :current-page="currentPage"
@@ -68,37 +73,55 @@
 
       <template #cell(name)="{ item }">
         <div class="d-flex align-items-center gap-2">
-          <img :src="item.user.image" class="avatar-sm rounded-circle" />
+          <div class="avatar avatar-sm">
+            <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
+              {{ item.name?.charAt(0) || 'C' }}
+            </div>
+          </div>
           <div>
-            <h5 class="mb-0 lh-base fs-base">
-              <RouterLink to="/users/profile" class="link-reset">{{ item.user.name }}</RouterLink>
-            </h5>
-            <p class="text-muted fs-xs mb-0">{{ item.user.email }}</p>
+            <h5 class="mb-0 lh-base fs-base">{{ item.fullName || '--' }}</h5>
+            <p class="text-muted fs-xs mb-0">{{ item.email || '---' }}</p>
           </div>
         </div>
       </template>
+
       <template #cell(phone)="{ item }">
-        <span>
-          {{ item.user.phone }}
+        <span>{{ item.phoneNumber || '-' }}</span>
+      </template>
+
+      <template #cell(city)="{ item }">
+        <span class="badge p-1 text-bg-light fs-sm">
+          <Icon icon="map-pin" class="me-1 fs-xs" />
+          {{ item.city || '-' }}
         </span>
       </template>
 
-      <template #cell(country)="{ item }">
-        <span class="badge p-1 text-bg-light fs-sm">
-          <img :src="item.country.flag" class="rounded-circle me-1" height="12" />
-          {{ item.country.code }}
+      <template #cell(gender)="{ item }">
+        <span class="badge" :class="item.gender === 'Homme' ? 'bg-info-subtle text-info' : 'bg-pink-subtle text-pink'">
+          {{ item.gender || '-' }}
         </span>
+      </template>
+
+      <template #cell(joined)="{ item }">
+        {{ formatDate(item.createdAt) }}
       </template>
 
       <template #cell(status)="{ item }">
-        <span :class="statusBadge(item.status)">
-          {{ formatStatus(item.status) }}
+        <span v-if="item.isVerified || item.emailVerified" class="badge bg-success-subtle text-success badge-label">
+          <Icon icon="circle-check" class="fs-xs me-1" /> Vérifié
         </span>
+        <span v-else class="badge bg-warning-subtle text-warning badge-label">
+          <Icon icon="clock" class="fs-xs me-1" /> En attente
+        </span>
+      </template>
+
+      <template #cell(lastLogin)="{ item }">
+        <span class="text-muted fs-xs">{{ formatDate(item.lastLogin) }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="d-flex align-items-center justify-content-center gap-1">
-          <BButton size="sm" class="btn-default btn-icon rounded-circle">
+          <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="router.push(`/apps/crm/customers/${item.id}`)">
             <Icon icon="eye" class="fs-lg" />
           </BButton>
           <BButton size="sm" class="btn-default btn-icon rounded-circle">
@@ -112,205 +135,117 @@
     </BTable>
 
     <BCardFooter class="border-0">
-      <TablePagination v-model:currentPage="currentPage" :per-page="perPage" :total-items="filteredCustomers.length" label="customers" />
+      <TablePagination v-model:currentPage="currentPage" :per-page="perPage" :total-items="filteredClients.length" label="clients" />
     </BCardFooter>
   </BCard>
-
-  <BModal v-model="showAddModal" title="Add New Customer" size="lg" ok-title="Add Customer" cancel-variant="light">
-    <form @submit.prevent="addCustomer">
-      <BRow class="g-3">
-        <BCol md="6">
-          <label class="form-label">Customer Name</label>
-          <BFormInput v-model="newCustomer.user.name" type="text" placeholder="Enter full name" required />
-        </BCol>
-
-        <BCol md="6">
-          <label class="form-label">Email Address</label>
-          <BFormInput v-model="newCustomer.user.email" type="email" placeholder="Enter email" required />
-        </BCol>
-
-        <BCol md="6">
-          <label class="form-label">Phone Number</label>
-          <BFormInput v-model="newCustomer.user.phone" type="text" placeholder="e.g. +1 234 567 8900" required />
-        </BCol>
-
-        <BCol md="6">
-          <label class="form-label">Company</label>
-          <BFormInput v-model="newCustomer.company" type="text" placeholder="Company name" />
-        </BCol>
-
-        <BCol md="6">
-          <label for="country" class="form-label">Country</label>
-          <BFormSelect v-model="country" class="form-select" id="country" required>
-            <option value="">Select country</option>
-            <option value="US">United States</option>
-            <option value="UK">United Kingdom</option>
-            <option value="IN">India</option>
-            <option value="CA">Canada</option>
-            <option value="DE">Germany</option>
-            <option value="FR">France</option>
-            <option value="JP">Japan</option>
-            <option value="BR">Brazil</option>
-            <option value="EG">Egypt</option>
-          </BFormSelect>
-        </BCol>
-
-        <BCol md="6">
-          <label for="customerType" class="form-label">Customer Type</label>
-          <BFormSelect class="form-select" id="customerType" required>
-            <option value="">Select type</option>
-            <option value="Lead">Lead</option>
-            <option value="Prospect">Prospect</option>
-            <option value="Client">Client</option>
-          </BFormSelect>
-        </BCol>
-
-        <BCol md="6">
-          <label for="Accostatus" class="form-label">Account Status</label>
-          <select class="form-select" id="Accostatus" required>
-            <option value="">Select status</option>
-            <option value="Active">Active</option>
-            <option value="Verification Pending">Verification Pending</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Blocked">Blocked</option>
-          </select>
-        </BCol>
-
-        <BCol md="6">
-          <label for="joinedDate" class="form-label">Joined Date</label>
-          <FlatPickr v-model="joinDate" class="form-control" type="date" :config="{ dateFormat: 'd M, Y', defaultDate: 'today' }" />
-        </BCol>
-      </BRow>
-    </form>
-  </BModal>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from "vue-router"
-import { computed, ref } from 'vue'
-import FlatPickr from 'vue-flatpickr-component'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
-import { customerData, type CustomerType } from './data'
+import { subscribeToClients } from '~/services/clients.service'
+import type { Client } from '~/types/client'
+
+const router = useRouter()
 
 const searchQuery = ref('')
-const filterStatus = ref('')
-const filterCountry = ref('')
-const country = ref('')
+const filterVerified = ref('')
+const filterCity = ref('')
+const filterGender = ref('')
 const perPage = ref(8)
 const perPageOptions = [5, 8, 10, 15, 20]
 
-const joinDate = ref('')
 const currentPage = ref(1)
-const selectedRows = ref<CustomerType[]>([])
+const selectedRows = ref<Client[]>([])
+const clientsList = ref<Client[]>([])
 
-// Table fields
-const fields = [
-  { key: 'select', label: '', thStyle: { width: '1%' } },
-  { key: 'name', label: 'Customer Name', sortable: true },
-  { key: 'phone', label: 'Phone', sortable: true },
-  { key: 'country', label: 'Country', sortable: true },
-  { key: 'joined', label: 'Joined', sortable: true },
-  { key: 'type', label: 'Type', sortable: true },
-  { key: 'company', label: 'Company', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'actions', label: 'Actions', thClass: 'text-center' },
-]
+let unsubscribe: (() => void) | null = null
 
-// Unique country list
-const uniqueCountries = [...new Set(customerData.map((c) => c.country.code))]
-
-const filteredCustomers = computed(() => {
-  return customerData.filter((item) => {
-    return (
-      (item.user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || item.user.email.toLowerCase().includes(searchQuery.value.toLowerCase())) &&
-      (!filterStatus.value || item.status === filterStatus.value) &&
-      (!filterCountry.value || item.country.code === filterCountry.value)
-    )
+onMounted(() => {
+  unsubscribe = subscribeToClients((data) => {
+    clientsList.value = data
   })
 })
 
-const allSelected = computed(() => selectedRows.value.length === filteredCustomers.value.length)
+onUnmounted(() => {
+  if (unsubscribe) unsubscribe()
+})
+
+const fields = [
+  { key: 'select', label: '', thStyle: { width: '1%' } },
+  { key: 'name', label: 'Nom du client', sortable: true },
+  { key: 'phone', label: 'Téléphone', sortable: true },
+  { key: 'city', label: 'Ville', sortable: true },
+  { key: 'gender', label: 'Genre', sortable: true },
+  { key: 'joined', label: 'Inscription', sortable: true },
+  { key: 'status', label: 'Statut', sortable: true },
+  { key: 'lastLogin', label: 'Dernière connexion', sortable: true },
+  { key: 'actions', label: 'Actions', thClass: 'text-center' },
+]
+
+const uniqueCities = computed(() => {
+  const cities = clientsList.value.map((c) => c.city).filter(Boolean) as string[]
+  return [...new Set(cities)].sort()
+})
+
+const filteredClients = computed(() => {
+  return clientsList.value.filter((item) => {
+    const matchSearch =
+      !searchQuery.value ||
+      (item.name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (item.email || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (item.phoneNumber || '').includes(searchQuery.value)
+
+    const matchCity = !filterCity.value || item.city === filterCity.value
+
+    const matchVerified =
+      !filterVerified.value ||
+      (filterVerified.value === 'verified' && (item.isVerified || item.emailVerified)) ||
+      (filterVerified.value === 'not-verified' && !item.isVerified && !item.emailVerified)
+
+    const matchGender = !filterGender.value || item.gender === filterGender.value
+
+    return matchSearch && matchCity && matchVerified && matchGender
+  })
+})
+
+const formatDate = (dateVal: unknown) => {
+  if (!dateVal) return '-'
+  let d: Date
+  if (typeof dateVal === 'string') {
+    d = new Date(dateVal)
+  } else if (dateVal instanceof Date) {
+    d = dateVal
+  } else if (typeof dateVal === 'object' && 'toDate' in dateVal && typeof dateVal.toDate === 'function') {
+    d = dateVal.toDate()
+  } else {
+    return '-'
+  }
+  return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+const allSelected = computed(() => selectedRows.value.length === filteredClients.value.length && filteredClients.value.length > 0)
 const isIndeterminate = computed(() => selectedRows.value.length > 0 && !allSelected.value)
 
-const toggleRow = (row: CustomerType) => {
+const toggleRow = (row: Client) => {
   const exists = selectedRows.value.includes(row)
   if (exists) selectedRows.value = selectedRows.value.filter((r) => r !== row)
   else selectedRows.value.push(row)
 }
 
 const toggleSelectAll = () => {
-  selectedRows.value = allSelected.value ? [] : [...filteredCustomers.value]
+  selectedRows.value = allSelected.value ? [] : [...filteredClients.value]
 }
 
-const statusBadge = (status: string) => {
-  return {
-    'badge bg-success-subtle text-success badge-label': status === 'active',
-    'badge bg-warning-subtle text-warning badge-label': status === 'verification-pending',
-    'badge bg-secondary-subtle text-secondary badge-label': status === 'inactive',
-    'badge bg-danger-subtle text-danger badge-label': status === 'blocked',
-  }
-}
-
-const formatStatus = (status: string) =>
-  ({
-    active: 'Active',
-    'verification-pending': 'Verification Pending',
-    inactive: 'Inactive',
-    blocked: 'Blocked',
-  })[status]
-
-// Delete functions
-const deleteRow = (item: CustomerType) => {
-  const index = customerData.indexOf(item)
-  if (index !== -1) customerData.splice(index, 1)
+const deleteRow = (item: Client) => {
+  clientsList.value = clientsList.value.filter((c) => c.id !== item.id)
 }
 
 const deleteSelected = () => {
-  selectedRows.value.forEach((r) => deleteRow(r))
+  const selectedIds = new Set(selectedRows.value.map((r) => r.id))
+  clientsList.value = clientsList.value.filter((c) => !selectedIds.has(c.id))
   selectedRows.value = []
-}
-
-// Add customer
-const showAddModal = ref(false)
-const newCustomer = ref<CustomerType>({
-  user: {
-    name: '',
-    email: '',
-    image: customerData[0]?.user.image ?? '/placeholder.png',
-    phone: '',
-  },
-  country: {
-    code: '',
-    flag: '',
-  },
-  joined: new Date().toDateString(),
-  type: 'Lead',
-  company: '',
-  status: 'active',
-})
-
-const addCustomer = () => {
-  customerData.push({
-    ...newCustomer.value,
-    country: {
-      code: newCustomer.value.country.code,
-      flag: customerData.find((c) => c.country === newCustomer.value.country)?.country.flag || '',
-    },
-  })
-
-  showAddModal.value = false
-  Object.assign(newCustomer.value, {
-    id: '',
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    country: {
-      code: '',
-      flag: '',
-    },
-    status: 'active',
-  })
 }
 </script>

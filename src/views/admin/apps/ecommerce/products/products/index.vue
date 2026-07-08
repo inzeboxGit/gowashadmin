@@ -1,5 +1,6 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <PageBreadcrumb title="Products" subtitle="Ecommerce" />
+  <PageBreadcrumb title="Produits Boutique GoWash" subtitle="Ecommerce" />
 
   <BAlert v-if="successMessage" variant="success" dismissible show @closed="successMessage = null">
     {{ successMessage }}
@@ -32,23 +33,23 @@
             <div class="app-search">
 
               <BFormSelect v-model="status" class="form-control my-1 my-md-0">
-                <option value="All">Statut</option>
-                <option value="Published">Publié</option>
-                <option value="Pending">En attente</option>
-                <option value="Out Of Stock">Rupture de stock</option>
+                <option value="Tout">Tous</option>
+                <option value="published">Publié</option>
+                <option value="pending">En attente</option>
+                <option value="outOfStock">Rupture de stock</option>
               </BFormSelect>
               <Icon icon="activity" class="app-search-icon text-muted" />
             </div>
 
             <div class="app-search">
               <BFormSelect v-model="priceRange" class="form-control my-1 my-md-0">
-                <option value="All">Plage de prix</option>
+                <option value="Tous">Plage de prix</option>
                 <option value="0-50">0 - 50</option>
                 <option value="51-150">51 - 150</option>
                 <option value="151-500">151 - 500</option>
                 <option value="500+">500+</option>
               </BFormSelect>
-              <Icon icon="dollar-sign" class="app-search-icon text-muted" />
+              <Icon icon="euro-sign" class="app-search-icon text-muted" />
             </div>
 
             <div>
@@ -76,7 +77,7 @@
 
         <BAlert v-if="error" variant="danger" show class="m-3 mb-0">{{ error }}</BAlert>
 
-        <BTable show-empty :busy="loading" empty-text="No products found." v-model:selected-rows="selected"
+        <BTable show-empty :busy="loading" empty-text="Aucun produit trouvé." v-model:selected-rows="selected"
           thead-class="bg-light align-middle bg-opacity-25 thead-sm" hover :fields="fields" :items="filteredProducts"
           :per-page="perPage" :current-page="currentPage" responsive
           class="table table-custom table-nowrap table-centered mb-0 w-100">
@@ -104,7 +105,7 @@
           <template #cell(name)="data">
             <div class="d-flex">
               <div class="avatar-md me-3">
-                <img :src="data.item.image" alt="Product" class="img-fluid rounded" />
+                <img :src="data.item.image" alt="Produit" class="img-fluid rounded" />
               </div>
               <div>
                 <h5 class="mb-1">
@@ -142,7 +143,7 @@
               <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="router.push(`/apps/ecommerce/product-details/${item.id}`)">
                 <Icon icon="eye" class="fs-lg" />
               </BButton>
-              <BButton size="sm" class="btn-default btn-icon rounded-circle">
+              <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="router.push(`/apps/ecommerce/product-edit/${item.id}`)">
                 <Icon icon="square-pen" class="fs-lg" />
               </BButton>
               <BButton size="sm" class="btn-default btn-icon rounded-circle">
@@ -200,14 +201,14 @@ const priceRange = ref('All')
 
 const fields = [
   { key: 'id', label: 'Id' },
-  { key: 'name', label: 'Product', sortable: true },
+  { key: 'name', label: 'Produit', sortable: true },
   { key: 'sku', label: 'SKU' },
-  { key: 'category', label: 'Category' },
+  { key: 'category', label: 'Catégorie' },
   { key: 'stock', label: 'Stock', sortable: true },
-  { key: 'price', label: 'Price', sortable: true },
-  { key: 'orders', label: 'Orders', sortable: true },
-  { key: 'rating', label: 'Rating', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
+  { key: 'price', label: 'Prix', sortable: true },
+  { key: 'orders', label: 'Commandes', sortable: true },
+  { key: 'rating', label: 'Évaluation', sortable: true },
+  { key: 'status', label: 'Statut', sortable: true },
   { key: 'publishDate', label: 'Published', sortable: true },
   { key: 'action', label: 'Action', sortable: false },
 ]

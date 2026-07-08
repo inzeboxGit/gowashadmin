@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <PageBreadcrumb title="Products Grid" subtitle="Ecommerce" />
 

@@ -5,6 +5,7 @@ export type MenuItemType = {
   label: string
   isTitle?: boolean
   icon?: string
+  iconClass?: string
   url?: string
   badge?: {
     className: string

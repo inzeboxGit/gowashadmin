@@ -30,7 +30,7 @@ export type OrderStatType = {
 
 export const orderStatData: OrderStatType[] = [
   {
-    title: 'Completed Orders',
+    title: 'Réservations complétées',
     value: 93.7,
     change: 3.34,
     icon: 'check',
@@ -38,21 +38,21 @@ export const orderStatData: OrderStatType[] = [
     suffix: 'k',
   },
   {
-    title: 'Pending Orders',
+    title: 'Réservations en attente',
     value: 557,
     change: -1.12,
     icon: 'hourglass',
     className: 'text-bg-warning',
   },
   {
-    title: 'Canceled Orders',
+    title: 'Réservations annulées',
     value: 269,
     change: -0.75,
     icon: 'x',
     className: 'text-bg-danger',
   },
   {
-    title: 'New Orders',
+    title: 'Nouvelles réservations',
     value: 9.3,
     change: 4.22,
     icon: 'shopping-cart',
@@ -60,7 +60,7 @@ export const orderStatData: OrderStatType[] = [
     suffix: 'k',
   },
   {
-    title: 'Returned Orders',
+    title: 'Réservations retournées',
     value: 8741,
     change: 0.56,
     icon: 'refresh-ccw',

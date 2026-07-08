@@ -1,5 +1,6 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <PageBreadcrumb title="Brands" subtitle="Ecommerce" />
+  <PageBreadcrumb title="Marques" subtitle="Ecommerce" />
 
   <BRow>
     <BCol xs="12">
@@ -115,8 +116,8 @@
 
     <BRow class="g-3">
       <BCol md="6">
-        <BFormGroup label="Brand Name" label-for="brandName" label-class="form-label">
-          <BFormInput id="brandName" v-model="brandForm.name" class="form-control" placeholder="e.g. Toyota" required />
+        <BFormGroup label="Nom de la marque" label-for="brandName" label-class="form-label">
+          <BFormInput id="brandName" v-model="brandForm.name" class="form-control" placeholder="ex: Toyota" required />
         </BFormGroup>
       </BCol>
 
@@ -127,7 +128,7 @@
       </BCol>
 
       <BCol md="12">
-        <BFormGroup label="Brand Logo" label-for="brandLogo" label-class="form-label">
+        <BFormGroup label="Logo de la marque" label-for="brandLogo" label-class="form-label">
           <BFormFile id="brandLogo" v-model="brandForm.logoFile" class="form-control" accept="image/*" />
         </BFormGroup>
       </BCol>
@@ -180,11 +181,11 @@ type BrandTableItem = {
 
 const fields: Exclude<TableFieldRaw<BrandTableItem>, string>[] = [
   { key: 'id', label: 'Id' },
-  { key: 'name', label: 'Brand Name', sortable: true },
+  { key: 'name', label: 'Nom de la marque', sortable: true },
   { key: 'slug', label: 'Slug', sortable: true },
-  { key: 'lastModified', label: 'Last Modified', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'action', label: 'Action', sortable: false },
+  { key: 'lastModified', label: 'Date de modification', sortable: true },
+  { key: 'status', label: 'Statut', sortable: true },
+  { key: 'action', label: 'Actions', sortable: false },
 ]
 
 const status = ref('All')

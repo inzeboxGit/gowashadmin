@@ -14,7 +14,7 @@
         <BCardHeader class="border-light justify-content-between">
           <div class="d-flex gap-2">
             <div class="app-search">
-              <BFormInput v-model="searchQuery" type="search" class="form-control" placeholder="Search order..." />
+              <BFormInput v-model="searchQuery" type="search" class="form-control" placeholder="Rechercher..." />
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
@@ -25,15 +25,7 @@
             <span class="me-2 fw-semibold">Filtrer par:</span>
 
             <div class="app-search">
-              <BFormSelect v-model="status" class="form-control my-1 my-md-0">
-                <option value="All">Statut de la réservation</option>
-                <option value="completed">Complétée</option>
-                <option value="pending">En attente</option>
-                <option value="accepted">En cours (Accepté)</option>
-                <option value="rejected">Rejeté</option>
-                <option value="cancelled">Annulé</option>
-              </BFormSelect>
-              <Icon icon="credit-card" class="app-search-icon text-muted" />
+              <!-- Removed status dropdown to enforce active only -->
             </div>
 
             <!-- <div class="app-search">
@@ -121,11 +113,22 @@
           </template>
           <template #cell(paymentStatus)="{ item }">
             <span class="fw-semibold text-success">
-              <Icon icon="circle" class="fs-sm" /> Paid
+              <Icon icon="circle" class="fs-sm" /> Payé
             </span>
           </template>
           <template #cell(orderStatus)="{ item }">
-            <span class="badge fs-xxs" :class="getStatusBadgeClass(item.serviceSnapshot?.status || item.status)">{{
+            <div v-if="isInProgress(item.serviceSnapshot?.status || item.status)" class="d-flex align-items-center gap-2">
+              <!-- <div class="progress-loader">
+                <span class="spinner-ring"></span>
+              </div> -->
+              <div class="d-flex flex-column">
+                <span class="badge badge-soft-warning fs-xxs">En cours</span>
+                <div class="progress-bar-track mt-1">
+                  <div class="progress-bar-fill"></div>
+                </div>
+              </div>
+            </div>
+            <span v-else class="badge fs-xxs" :class="getStatusBadgeClass(item.serviceSnapshot?.status || item.status)">{{ 
               toPascalCase(item.serviceSnapshot?.status || item.status || 'En cours')
             }}</span>
           </template>
@@ -167,8 +170,8 @@ import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
 import { toPascalCase } from '~/utils/helpers'
-import OrderStatisticWidget from './components/OrderStatisticWidget.vue'
-import { orderData, type OrderStatType, type OrderType } from './components/data'
+import OrderStatisticWidget from '../orders/components/OrderStatisticWidget.vue'
+import { orderData, type OrderStatType, type OrderType } from '../orders/components/data'
 import { getReservations, subscribeToReservations } from '~/services/reservations.service'
 import type { Reservation } from '~/types/reservation'
 import { onMounted, onUnmounted, computed, watch } from 'vue'
@@ -287,6 +290,11 @@ const getStatusBadgeClass = (status?: string) => {
   return 'badge-soft-secondary'
 }
 
+const isInProgress = (status?: string) => {
+  const s = (status || '').toLowerCase()
+  return s === 'in_progress' || s === 'en_cours' || s === 'accepted'
+}
+
 const deliveryStatus = ref('All')
 const status = ref('All')
 const dateRange = ref('All')
@@ -318,13 +326,11 @@ const filteredReservations = computed(() => {
     })
   }
 
-  if (status.value !== 'All') {
-    const sVal = status.value.toLowerCase()
-    result = result.filter(item => {
-      const s = (item.serviceSnapshot?.status || item.status || '').toLowerCase()
-      return s === sVal
-    })
-  }
+  // Force active status
+  result = result.filter(item => {
+    const s = (item.serviceSnapshot?.status || item.status || '').toLowerCase()
+    return s === 'accepted' || s === 'in_progress' || s === 'en_cours'
+  })
 
   return result
 })
@@ -343,7 +349,7 @@ const fields: Exclude<TableFieldRaw<Reservation>, string>[] = [
   { key: 'customer', label: 'Client', sortable: true },
   { key: 'amount', label: 'Total', sortable: true },
   { key: 'paymentStatus', label: 'Paiement', sortable: true },
-  { key: 'orderStatus', label: 'Order Status', sortable: true },
+  { key: 'orderStatus', label: 'Statut de la commande', sortable: true },
   { key: 'paymentMethod', label: 'Method de Paiement' },
   { key: 'action', label: 'Actions', sortable: false },
 ]
@@ -381,4 +387,51 @@ function handleDeleteSelected() {
 const { selected, toggleSelectAll, onToggleRow, deleteSelected, deleteItem, allSelected, isIndeterminate } = useTableActions(reservationsList)
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Spinner ring for in_progress */
+.progress-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.spinner-ring {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 165, 0, 0.25);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Progress bar track */
+.progress-bar-track {
+  width: 72px;
+  height: 4px;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 99px;
+  animation: progress-slide 1.4s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0%   { transform: translateX(-100%); width: 40%; }
+  50%  { transform: translateX(150%); width: 60%; }
+  100% { transform: translateX(250%); width: 40%; }
+}
+</style>

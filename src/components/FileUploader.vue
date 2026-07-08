@@ -10,9 +10,13 @@
           <Icon icon="cloud-upload" class="fs-24" />
         </span>
       </div>
-      <h4 class="mb-2">Drop files here or click to upload.</h4>
+      <!-- transalte englieshto french -->
+      <!-- <h4 class="mb-2">Drop files here or click to upload.</h4>
       <p class="text-muted fst-italic mb-3">You can drag images here, or browse files via the button below.</p>
-      <button type="button" class="btn btn-sm shadow btn-default">Browse Images</button>
+      <button type="button" class="btn btn-sm shadow btn-default">Browse Images</button> -->
+      <h4 class="mb-2">Déposez vos fichiers ici ou cliquez pour les télécharger.</h4>
+      <p class="text-muted fst-italic mb-3">Vous pouvez glisser des images ici, ou parcourir les fichiers via le bouton ci-dessous.</p>
+      <button type="button" class="btn btn-sm shadow btn-default">Parcourir les images</button>
     </div>
   </BForm>
 

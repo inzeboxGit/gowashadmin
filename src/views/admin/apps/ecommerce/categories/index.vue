@@ -7,7 +7,7 @@
         <BCardHeader class="border-light justify-content-between">
           <div class="d-flex gap-2">
             <div class="app-search">
-              <BFormInput type="search" placeholder="Search category..." v-model="searchQuery" />
+              <BFormInput type="search" placeholder="Rechercher une categorie..." v-model="searchQuery" />
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
@@ -21,7 +21,7 @@
 
             <div class="app-search">
               <BFormSelect v-model="status" class="form-control my-1 my-md-0">
-                <option value="All">All</option>
+                <option value="All">Toutes</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </BFormSelect>
@@ -29,7 +29,7 @@
             </div>
 
             <BButton variant="primary" class="ms-1" v-b-modal.addCategoryModal>
-              <Icon icon="plus" class="fs-sm me-2" /> Add Category
+              <Icon icon="plus" class="fs-sm me-2" /> Ajouter une catégorie
             </BButton>
           </div>
         </BCardHeader>
@@ -111,7 +111,7 @@
 
     <BRow class="g-3">
       <BCol md="6">
-        <BFormGroup label="Category Name" label-for="categoryName" label-class="form-label">
+        <BFormGroup label="Nom de la catégorie" label-for="categoryName" label-class="form-label">
           <BFormInput id="categoryName" v-model="categoryForm.categoryName" class="form-control" placeholder="e.g. Electronics" required />
         </BFormGroup>
       </BCol>
@@ -123,7 +123,7 @@
       </BCol>
 
       <BCol md="12">
-        <BFormGroup label="Category Image" label-for="categoryImage" label-class="form-label">
+        <BFormGroup label="Image de la catégorie" label-for="categoryImage" label-class="form-label">
           <BFormFile id="categoryImage" v-model="categoryForm.imageFile" class="form-control" accept="image/*" />
         </BFormGroup>
       </BCol>
@@ -139,9 +139,9 @@
       </BCol>
 
       <BCol md="12">
-        <BFormGroup label="Description (Optional)" label-for="categoryDescription" label-class="form-label">
+        <BFormGroup label="Description (Optionnel)" label-for="categoryDescription" label-class="form-label">
           <BFormTextarea id="categoryDescription" v-model="categoryForm.description" class="form-control" rows="3"
-            placeholder="Brief description of the category..." />
+            placeholder="Description de la catégorie..." />
         </BFormGroup>
       </BCol>
     </BRow>
@@ -170,14 +170,14 @@ type CategoryTableItem = CategoryType & {
 
 const fields: Exclude<TableFieldRaw<CategoryTableItem>, string>[] = [
   { key: 'id', label: 'Id' },
-  { key: 'name', label: 'Category Name', sortable: true },
+  { key: 'name', label: 'Nom de la catégorie', sortable: true },
   { key: 'slug', label: 'Slug', sortable: true },
-  { key: 'products', label: 'Products', sortable: true },
-  { key: 'orders', label: 'Orders', sortable: true },
-  { key: 'earnings', label: 'Earnings', sortable: true },
-  { key: 'lastModified', label: 'Last Modified', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'action', label: 'Action', sortable: false },
+  { key: 'products', label: 'Produits', sortable: true },
+  { key: 'orders', label: 'Commandes', sortable: true },
+  { key: 'earnings', label: 'Gains', sortable: true },
+  { key: 'lastModified', label: 'Date de modification', sortable: true },
+  { key: 'status', label: 'Statut', sortable: true },
+  { key: 'action', label: 'Actions', sortable: false },
 ]
 
 const status = ref('All')
@@ -204,8 +204,8 @@ const categoryForm = ref({
   currentImageUrl: '',
 })
 
-const modalTitle = computed(() => (editingCategoryId.value ? 'Edit Category' : 'Add New Category'))
-const modalOkTitle = computed(() => (editingCategoryId.value ? 'Update Category' : 'Add Category'))
+const modalTitle = computed(() => (editingCategoryId.value ? 'Modifier la catégorie' : 'Ajouter une nouvelle catégorie'))
+const modalOkTitle = computed(() => (editingCategoryId.value ? 'Mettre à jour la catégorie' : 'Ajouter une catégorie'))
 
 const filteredCategories = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase()

@@ -15,7 +15,7 @@ export const menuItems: MenuItemType[] = [
           {
             'url': '/dashboard/ecommerce',
             'slug': 'pages:dashboard-ecommerce',
-            'label': 'Ecommerce',
+            'label': 'Tableau de bord',
           },
           // {
           //   'url': '/dashboard/projects',
@@ -35,7 +35,7 @@ export const menuItems: MenuItemType[] = [
   {
     'icon': 'layout-grid',
     'slug': 'apps',
-    'label': 'Apps',
+    'label': 'Gestion de la Platforme',
     'isTitle': true,
     'children': [
       {
@@ -82,7 +82,7 @@ export const menuItems: MenuItemType[] = [
             'slug': 'pages:apps-ecommerce-brands',
             'label': 'Marques',
           },
-          
+
           // {
           //   'url': '/apps/ecommerce/customers',
           //   'icon': 'users',
@@ -118,12 +118,12 @@ export const menuItems: MenuItemType[] = [
           //   'slug': 'pages:apps-ecommerce-refunds',
           //   'label': 'Refunds',
           // },
-          {
-            'url': '/apps/ecommerce/reviews',
-            'icon': 'message-square-quote',
-            'slug': 'pages:apps-ecommerce-reviews',
-            'label': 'Reviews',
-          },
+          // {
+          //   'url': '/apps/ecommerce/reviews',
+          //   'icon': 'message-square-quote',
+          //   'slug': 'pages:apps-ecommerce-reviews',
+          //   'label': 'Reviews',
+          // },
           // {
           //   'url': '/apps/ecommerce/attributes',
           //   'icon': 'wand-sparkles',
@@ -136,73 +136,85 @@ export const menuItems: MenuItemType[] = [
         'url': '/apps/ecommerce/orders',
         'icon': 'shopping-bag',
         'slug': 'pages:apps-ecommerce-orders',
-        'label': 'Reservations',
+        'label': 'Réservation',
+      },
+      {
+        'url': '/apps/ecommerce/active-orders',
+        'icon': 'activity',
+        'slug': 'pages:apps-ecommerce-active-orders',
+        'label': 'Réservation en cours',
       },
       {
         'icon': 'handshake',
         'slug': 'crm',
         'label': 'CRM Go Wash',
         'children': [
-          {
-            'url': '/apps/crm/contacts',
-            'icon': 'users',
-            'slug': 'pages:apps-crm-contacts',
-            'label': 'Contacts',
-          },
-          {
-            'url': '/apps/crm/opportunities',
-            'icon': 'lightbulb',
-            'slug': 'pages:apps-crm-opportunities',
-            'label': 'Opportunities',
-          },
-          {
-            'url': '/apps/crm/deals',
-            'icon': 'signature',
-            'slug': 'pages:apps-crm-deals',
-            'label': 'Deals',
-          },
-          {
-            'url': '/apps/crm/leads',
-            'icon': 'medal',
-            'slug': 'pages:apps-crm-leads',
-            'label': 'Leads',
-          },
-          {
-            'url': '/apps/crm/pipeline',
-            'icon': 'kanban',
-            'slug': 'pages:apps-crm-pipeline',
-            'label': 'Pipeline',
-          },
-          {
-            'url': '/apps/crm/campaign',
-            'icon': 'megaphone',
-            'slug': 'pages:apps-crm-campaign',
-            'label': 'Campaign',
-          },
-          {
-            'url': '/apps/crm/proposals',
-            'icon': 'notebook-pen',
-            'slug': 'pages:apps-crm-proposals',
-            'label': 'Proposals',
-          },
-          {
-            'url': '/apps/crm/estimations',
-            'icon': 'receipt-text',
-            'slug': 'pages:apps-crm-estimations',
-            'label': 'Estimations',
-          },
+          // {
+          //   'url': '/apps/crm/contacts',
+          //   'icon': 'users',
+          //   'slug': 'pages:apps-crm-contacts',
+          //   'label': 'Contacts',
+          // },
+          // {
+          //   'url': '/apps/crm/opportunities',
+          //   'icon': 'lightbulb',
+          //   'slug': 'pages:apps-crm-opportunities',
+          //   'label': 'Opportunities',
+          // },
+          // {
+          //   'url': '/apps/crm/deals',
+          //   'icon': 'signature',
+          //   'slug': 'pages:apps-crm-deals',
+          //   'label': 'Deals',
+          // },
+          // {
+          //   'url': '/apps/crm/leads',
+          //   'icon': 'medal',
+          //   'slug': 'pages:apps-crm-leads',
+          //   'label': 'Leads',
+          // },
+          // {
+          //   'url': '/apps/crm/pipeline',
+          //   'icon': 'kanban',
+          //   'slug': 'pages:apps-crm-pipeline',
+          //   'label': 'Pipeline',
+          // },
+          // {
+          //   'url': '/apps/crm/campaign',
+          //   'icon': 'megaphone',
+          //   'slug': 'pages:apps-crm-campaign',
+          //   'label': 'Campaign',
+          // },
+          // {
+          //   'url': '/apps/crm/proposals',
+          //   'icon': 'notebook-pen',
+          //   'slug': 'pages:apps-crm-proposals',
+          //   'label': 'Proposals',
+          // },
+          // {
+          //   'url': '/apps/crm/estimations',
+          //   'icon': 'receipt-text',
+          //   'slug': 'pages:apps-crm-estimations',
+          //   'label': 'Devis',
+          // },
           {
             'url': '/apps/crm/customers',
             'icon': 'users-round',
             'slug': 'pages:apps-crm-customers',
-            'label': 'Customers',
+            'label': 'Clients',
           },
           {
-            'url': '/apps/crm/activities',
-            'icon': 'activity',
-            'slug': 'pages:apps-crm-activities',
-            'label': 'Activities',
+            'url': '/apps/crm/washers',
+            'icon': 'spray-can',
+            'slug': 'pages:apps-crm-washers',
+            'label': 'Gestion des Laveurs',
           },
+          // {
+          //   'url': '/apps/crm/activities',
+          //   'icon': 'activity',
+          //   'slug': 'pages:apps-crm-activities',
+          //   'label': 'Activities',
+          // },
         ],
       },
       // {
@@ -272,7 +284,7 @@ export const menuItems: MenuItemType[] = [
         'url': '/apps/file-manager',
         'icon': 'folder-open-dot',
         'slug': 'pages:apps-file-manager',
-        'label': 'File Manager',
+        'label': 'Gestion de Media',
       },
       // {
       //   'url': '/apps/chat',
@@ -342,12 +354,12 @@ export const menuItems: MenuItemType[] = [
       //     },
       //   ],
       // },
-      {
-        'url': '/apps/api-keys',
-        'icon': 'key',
-        'slug': 'pages:apps-api-keys',
-        'label': 'Api Keys Go Wash',
-      },
+      // {
+      //   'url': '/apps/api-keys',
+      //   'icon': 'key',
+      //   'slug': 'pages:apps-api-keys',
+      //   'label': 'Api Keys Go Wash',
+      // },
     ],
   },
   // {

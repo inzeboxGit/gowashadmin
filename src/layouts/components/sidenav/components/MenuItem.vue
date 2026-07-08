@@ -1,7 +1,7 @@
 <template>
   <li class="side-nav-item" :class="{ active: isActive }">
     <RouterLink :to="item.url ?? ''" class="side-nav-link" :class="{ disabled: item.isDisabled, 'special-menu': item.isSpecial, active: isActive }">
-      <span v-if="item.icon && !isTopLevel" class="menu-icon">
+      <span v-if="item.icon && !isTopLevel" class="menu-icon" :class="item.iconClass">
         <Icon :icon="item.icon" />
       </span>
       <span class="menu-text">{{ item.label }}</span>

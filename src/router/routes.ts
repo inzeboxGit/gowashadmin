@@ -46,6 +46,24 @@ export const allRoutes = [
             meta: { title: 'Clients' },
             component: () => import('~/views/admin/apps/crm/customers/index.vue')
         },
+        {
+            path: '/apps/crm/customers/:id',
+            name: 'apps.crm.customer-detail',
+            meta: { title: 'Fiche Client' },
+            component: () => import('~/views/admin/apps/crm/customers/customer-detail/index.vue')
+        },
+        {
+            path: '/apps/crm/washers',
+            name: 'apps.crm.washers',
+            meta: { title: 'Laveurs' },
+            component: () => import('~/views/admin/apps/crm/washers/index.vue')
+        },
+        {
+            path: '/apps/crm/washers/:id',
+            name: 'apps.crm.washer-detail',
+            meta: { title: 'Fiche Laveur' },
+            component: () => import('~/views/admin/apps/crm/washers/washer-detail/index.vue')
+        },
         // {
         //     path: '/apps/crm/deals',
         //     name: 'apps.crm.deals',
@@ -126,9 +144,13 @@ export const allRoutes = [
         },
         {
             path: '/apps/ecommerce/orders',
-            name: 'apps.ecommerce.orders',
-            meta: { title: 'Orders' },
+            name: 'ecommerce-orders',
             component: () => import('~/views/admin/apps/ecommerce/orders/orders/index.vue')
+        },
+        {
+            path: '/apps/ecommerce/active-orders',
+            name: 'ecommerce-active-orders',
+            component: () => import('~/views/admin/apps/ecommerce/orders/active-orders/index.vue')
         },
         {
             path: '/apps/ecommerce/product-add',

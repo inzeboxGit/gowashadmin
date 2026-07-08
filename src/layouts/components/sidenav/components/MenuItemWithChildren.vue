@@ -43,28 +43,20 @@ const isActive = computed(() => {
 })
 
 const isOpen = computed(() => {
-  return isTopLevel.value ? props.openMenuKey === props.item.slug : localOpen.value
+  return localOpen.value
 })
 
-const localOpen = ref(false)
+const localOpen = ref(true)
 const didAutoOpen = ref(false)
 
 watchEffect(() => {
   if (isActive.value && !didAutoOpen.value) {
-    if (isTopLevel.value && props.setOpenMenuKey) {
-      props.setOpenMenuKey(props.item.slug)
-    } else {
-      localOpen.value = true
-    }
+    localOpen.value = true
     didAutoOpen.value = true
   }
 })
 
 const toggleOpen = () => {
-  if (isTopLevel.value && props.setOpenMenuKey) {
-    props.setOpenMenuKey(isOpen.value ? null : props.item.slug)
-  } else {
-    localOpen.value = !localOpen.value
-  }
+  localOpen.value = !localOpen.value
 }
 </script>

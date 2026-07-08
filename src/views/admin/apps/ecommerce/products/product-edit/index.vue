@@ -227,19 +227,19 @@ const handleUpdate = async () => {
 
     await updateProduct(route.params.id as string, {
       title: form.value.title.trim(),
-      brandName: form.value.brandName.trim(),
+      brandName: (form.value.brandName || '').trim(),
       category: category.value,
-      condition: form.value.condition.trim() || undefined,
-      description: form.value.description,
+      condition: (form.value.condition || '').trim() || undefined,
+      description: form.value.description || '',
       discount: Number(form.value.discount || 0),
       imageFile: form.value.images[0] || null,
-      imageUrl: currentImageUrl.value,
+      imageUrl: currentImageUrl.value || '',
       oldPrice: Number(form.value.oldPrice || 0),
       price: Number(form.value.price),
-      productUrl: form.value.productUrl.trim() || undefined,
-      published: form.value.published,
-      reference: form.value.reference.trim() || undefined,
-      size: form.value.size.trim() || undefined,
+      productUrl: (form.value.productUrl || '').trim() || undefined,
+      published: Boolean(form.value.published),
+      reference: (form.value.reference || '').trim() || undefined,
+      size: (form.value.size || '').trim() || undefined,
       stock: Number(form.value.stock || 0),
     })
 
@@ -258,22 +258,22 @@ onMounted(async () => {
     const product = await getProductById(route.params.id as string)
     if (!product) { fetchError.value = 'Produit introuvable.'; return }
 
-    currentImageUrl.value = product.imageUrl
-    category.value = product.category
+    currentImageUrl.value = product.imageUrl || ''
+    category.value = product.category || ''
     form.value = {
-      title: product.title,
+      title: product.title || '',
       reference: product.reference || '',
       stock: product.stock ?? 0,
       condition: product.condition || '',
       size: product.size || '',
       productUrl: product.productUrl || '',
-      description: product.description,
+      description: product.description || '',
       images: [],
-      price: product.price,
-      oldPrice: product.oldPrice,
-      discount: product.discount,
-      brandName: product.brandName,
-      published: product.published,
+      price: product.price ?? 0,
+      oldPrice: product.oldPrice ?? 0,
+      discount: product.discount ?? 0,
+      brandName: product.brandName || '',
+      published: product.published ?? false,
     }
   } catch {
     fetchError.value = 'Erreur lors du chargement du produit.'
