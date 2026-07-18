@@ -135,7 +135,7 @@
           <template #cell(paymentMethod)="{ item }">
             <div class="d-flex align-items-center">
               <img :src="getPaymentImage(item.paymentMethodTitle)" alt="card" class="me-2" height="28" />
-              {{ item.paymentMethodSubtitle || item.paymentMethodTitle || 'Carte' }}
+              {{ item.paymentMethodTitle || 'Carte' }}
             </div>
           </template>
           <template #cell(action)="{ item }">

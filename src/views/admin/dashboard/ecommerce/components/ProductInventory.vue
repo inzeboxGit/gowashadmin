@@ -1,17 +1,23 @@
 <template>
   <BCard no-body>
     <div class="card-header justify-content-between align-items-center border-dashed">
-      <h4 class="card-title mb-0">Product Inventory</h4>
+      <h4 class="card-title mb-0">Inventaire des produits</h4>
       <div class="d-flex gap-2">
-        <RouterLink to="/apps/ecommerce/products/product-add" class="btn btn-sm btn-soft-secondary"> <IconifyIcon icon="tabler:plus" class="me-1" /> Add Product </RouterLink>
-        <RouterLink to="/apps/ecommerce/products" class="btn btn-sm btn-primary"> <IconifyIcon icon="tabler:packages" class="me-1" /> Products </RouterLink>
+        <RouterLink to="/apps/ecommerce/products/product-add" class="btn btn-sm btn-soft-secondary">
+          <IconifyIcon icon="tabler:plus" class="me-1" /> Ajouter un produit
+        </RouterLink>
+        <RouterLink to="/apps/ecommerce/products" class="btn btn-sm btn-primary">
+          <IconifyIcon icon="tabler:packages" class="me-1" /> Produits
+        </RouterLink>
       </div>
     </div>
 
     <BAlert v-if="error" variant="danger" show class="m-3 mb-0">{{ error }}</BAlert>
 
     <BCardBody class="p-0">
-      <BTable small hover :busy="loading" show-empty empty-text="No products found." :fields="fields" :items="products" :per-page="perPage" :current-page="currentPage" responsive thead-class="d-none" class="table table-centered table-custom table-nowrap mb-0">
+      <BTable small hover :busy="loading" show-empty empty-text="No products found." :fields="fields" :items="products"
+        :per-page="perPage" :current-page="currentPage" responsive thead-class="d-none"
+        class="table table-centered table-custom table-nowrap mb-0">
         <template #cell(imagenamecategoryurl)="data">
           <div class="d-flex align-items-center">
             <img :src="data.item.image" alt="" class="avatar-sm rounded-circle me-2" />
@@ -48,7 +54,8 @@
         </template>
 
         <template #cell(actions)>
-          <BDropdown :variant="null" placement="bottom-end" no-caret toggle-class="text-muted drop-arrow-none card-drop p-0">
+          <BDropdown :variant="null" placement="bottom-end" no-caret
+            toggle-class="text-muted drop-arrow-none card-drop p-0">
             <template #button-content>
               <IconifyIcon icon="tabler:dots-vertical" class="fs-lg" />
             </template>
@@ -59,7 +66,8 @@
       </BTable>
     </BCardBody>
     <div class="card-footer">
-      <TablePagination v-model:currentPage="currentPage" :per-page="perPage" :total-items="totalRows" label="products" />
+      <TablePagination v-model:currentPage="currentPage" :per-page="perPage" :total-items="totalRows"
+        label="products" />
     </div>
   </BCard>
 </template>

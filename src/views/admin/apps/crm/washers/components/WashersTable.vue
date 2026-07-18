@@ -6,7 +6,7 @@
           <BFormInput v-model="searchQuery" type="search" placeholder="Rechercher un laveur..." />
           <Icon icon="search" class="app-search-icon text-muted" />
         </div>
-        <BButton v-if="selectedRows.length" variant="danger" @click="deleteSelected">Supprimer</BButton>
+        <BButton v-if="selectedRows.length" variant="danger" @click="confirmDeleteSelected">Supprimer</BButton>
       </div>
 
       <div class="d-flex align-items-center gap-2">
@@ -15,8 +15,8 @@
         <div class="app-search">
           <BFormSelect v-model="filterAvailable" class="form-control my-1 my-md-0">
             <option value="">Disponibilité</option>
-            <option value="On">Disponible</option>
-            <option value="Off">Indisponible</option>
+            <option value="available">Disponible</option>
+            <option value="unavailable">Indisponible</option>
           </BFormSelect>
           <Icon icon="wifi" class="app-search-icon text-muted" />
         </div>
@@ -116,10 +116,10 @@
       <template #cell(availability)="{ item }">
         <span
           class="badge"
-          :class="item.laveurData?.isAvailable === 'On' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'"
+          :class="isWasherAvailable(item) ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'"
         >
-          <span class="availability-dot me-1" :class="item.laveurData?.isAvailable === 'On' ? 'dot-on' : 'dot-off'"></span>
-          {{ item.laveurData?.isAvailable === 'On' ? 'Disponible' : 'Indisponible' }}
+          <span class="availability-dot me-1" :class="isWasherAvailable(item) ? 'dot-on' : 'dot-off'"></span>
+          {{ isWasherAvailable(item) ? 'Disponible' : 'Indisponible' }}
         </span>
       </template>
 
@@ -157,7 +157,7 @@
           <BButton size="sm" class="btn-default btn-icon rounded-circle">
             <Icon icon="square-pen" class="fs-lg" />
           </BButton>
-          <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="deleteRow(item)">
+          <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="confirmDeleteRow(item)">
             <Icon icon="trash-2" class="fs-lg" />
           </BButton>
         </div>
@@ -168,6 +168,28 @@
       <TablePagination v-model:currentPage="currentPage" :per-page="perPage" :total-items="filteredWashers.length" label="laveurs" />
     </BCardFooter>
   </BCard>
+
+  <BModal v-model="confirmModal.show" hide-header hide-footer centered content-class="border-0 shadow-lg confirm-modal-content">
+    <div class="text-center p-4">
+      <div class="mb-4 d-flex justify-content-center">
+        <div class="confirm-icon-wrapper bg-danger-subtle text-danger">
+          <Icon icon="trash-2" class="fs-1" />
+        </div>
+      </div>
+      <h4 class="fw-bold mb-3">{{ confirmModal.title }}</h4>
+      <p class="text-muted mb-4 fs-sm">{{ confirmModal.message }}</p>
+
+      <div class="d-flex justify-content-center gap-3">
+        <BButton variant="light" class="px-4 fw-medium" :disabled="confirmModal.loading" @click="confirmModal.show = false">
+          Annuler
+        </BButton>
+        <BButton variant="danger" class="px-4 fw-medium" :disabled="confirmModal.loading" @click="confirmModal.onConfirm">
+          <span v-if="confirmModal.loading" class="spinner-border spinner-border-sm me-2"></span>
+          Supprimer
+        </BButton>
+      </div>
+    </div>
+  </BModal>
 </template>
 
 
@@ -176,7 +198,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
-import { subscribeToWashers } from '~/services/washers.service'
+import { deleteWasher as apiDeleteWasher, subscribeToWashers } from '~/services/washers.service'
 import type { Washer } from '~/types/washer'
 
 const searchQuery = ref('')
@@ -188,6 +210,13 @@ const perPageOptions = [5, 8, 10, 15, 20]
 const currentPage = ref(1)
 const selectedRows = ref<Washer[]>([])
 const washersList = ref<Washer[]>([])
+const confirmModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  loading: false,
+  onConfirm: () => {},
+})
 
 let unsubscribe: (() => void) | null = null
 
@@ -214,6 +243,11 @@ const fields = [
   { key: 'actions', label: 'Actions', thClass: 'text-center' },
 ]
 
+const isWasherAvailable = (item: Washer) => {
+  const availability = item.laveurData?.isAvailable
+  return availability === true || availability === 'On'
+}
+
 const filteredWashers = computed(() => {
   return washersList.value.filter((item) => {
     const q = searchQuery.value.toLowerCase()
@@ -225,7 +259,9 @@ const filteredWashers = computed(() => {
       (item.phoneNumber || '').includes(q)
 
     const matchAvailable =
-      !filterAvailable.value || item.laveurData?.isAvailable === filterAvailable.value
+      !filterAvailable.value ||
+      (filterAvailable.value === 'available' && isWasherAvailable(item)) ||
+      (filterAvailable.value === 'unavailable' && !isWasherAvailable(item))
 
     const matchVerified =
       !filterVerified.value ||
@@ -254,14 +290,52 @@ const toggleSelectAll = () => {
   selectedRows.value = allSelected.value ? [] : [...filteredWashers.value]
 }
 
-const deleteRow = (item: Washer) => {
-  washersList.value = washersList.value.filter((w) => w.id !== item.id)
+const getWasherName = (item: Washer) => item.laveurProfile?.businessName || item.fullName || item.email || item.id
+
+const showConfirm = (options: { title: string; message: string; onConfirm: () => Promise<void> }) => {
+  confirmModal.value = {
+    show: true,
+    title: options.title,
+    message: options.message,
+    loading: false,
+    onConfirm: async () => {
+      confirmModal.value.loading = true
+      try {
+        await options.onConfirm()
+        confirmModal.value.show = false
+      } catch (error) {
+        console.error('Error deleting washer account:', error)
+        alert('Erreur lors de la suppression du compte laveur.')
+      } finally {
+        confirmModal.value.loading = false
+      }
+    },
+  }
 }
 
-const deleteSelected = () => {
-  const selectedIds = new Set(selectedRows.value.map((r) => r.id))
-  washersList.value = washersList.value.filter((w) => !selectedIds.has(w.id))
-  selectedRows.value = []
+const confirmDeleteRow = (item: Washer) => {
+  showConfirm({
+    title: 'Supprimer le compte laveur',
+    message: `Confirmez-vous la suppression définitive du compte "${getWasherName(item)}" ? Cette action est irréversible.`,
+    onConfirm: async () => {
+      await apiDeleteWasher(item.id)
+      selectedRows.value = selectedRows.value.filter((row) => row.id !== item.id)
+    },
+  })
+}
+
+const confirmDeleteSelected = () => {
+  const count = selectedRows.value.length
+  const rowsToDelete = [...selectedRows.value]
+
+  showConfirm({
+    title: 'Supprimer les comptes sélectionnés',
+    message: `Confirmez-vous la suppression définitive de ${count} compte${count > 1 ? 's' : ''} laveur ? Cette action est irréversible.`,
+    onConfirm: async () => {
+      await Promise.all(rowsToDelete.map((row) => apiDeleteWasher(row.id)))
+      selectedRows.value = []
+    },
+  })
 }
 </script>
 
@@ -288,6 +362,17 @@ const deleteSelected = () => {
 }
 .dot-off {
   background: #94a3b8;
+}
+.confirm-modal-content {
+  border-radius: 24px !important;
+}
+.confirm-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 @keyframes pulse-green {
   0%, 100% { box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25); }

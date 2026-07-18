@@ -30,24 +30,21 @@ type FirestoreDateLike = string | Date | { toDate: () => Date } | undefined
 
 export type DashboardRecentReservation = {
   id: string
-  customerName: string
+  referenceCode: string
+  clientName: string
   packageName: string
   createdAt: string
-  totalAmount: number
+  totalPrice: number
   status: string
 }
 
 type ReservationDocument = {
-  clientName?: string
-  customerName?: string
-  fullName?: string
-  name?: string
+  clientSnapshot?: {
+    fullName?: string
+  }
+  referenceCode?: string
   packageName?: string
-  serviceName?: string
-  productName?: string
-  totalAmount?: number
-  amount?: number
-  price?: number
+  totalPrice?: number
   status?: string
   createdAt?: FirestoreDateLike
 }
@@ -233,10 +230,11 @@ export const getLatestReservations = async (itemsLimit = 7): Promise<DashboardRe
 
     return {
       id: reservationDoc.id,
-      customerName: reservation.customerName || reservation.clientName || reservation.fullName || reservation.name || 'Client',
-      packageName: reservation.packageName || reservation.serviceName || reservation.productName || 'Reservation',
+      referenceCode: reservation.referenceCode || reservationDoc.id,
+      clientName: reservation.clientSnapshot?.fullName || 'Client',
+      packageName: reservation.packageName || 'Reservation',
       createdAt: toISOString(reservation.createdAt),
-      totalAmount: reservation.totalAmount ?? reservation.amount ?? reservation.price ?? 0,
+      totalPrice: reservation.totalPrice ?? 0,
       status: reservation.status || 'pending',
     }
   })

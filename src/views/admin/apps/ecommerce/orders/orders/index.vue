@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <PageBreadcrumb title="Réservations" subtitle="Gestion de la plateforme" />
+  <PageBreadcrumb title="Commandes" subtitle="Gestion de la plateforme" />
 
   <BRow class="row-cols-xxl-5 row-cols-md-3 row-cols-1 align-items-center g-1">
     <BCol v-for="(item, idx) in orderStatData" :key="idx">
@@ -132,7 +132,7 @@
           <template #cell(paymentMethod)="{ item }">
             <div class="d-flex align-items-center">
               <img :src="getPaymentImage(item.paymentMethodTitle)" alt="card" class="me-2" height="28" />
-              {{ item.paymentMethodSubtitle || item.paymentMethodTitle || 'Carte' }}
+              {{ item.paymentMethodTitle || 'Carte' }}
             </div>
           </template>
           <template #cell(action)="{ item }">
@@ -228,19 +228,19 @@ const orderStatData = computed<OrderStatType[]>(() => {
 
   return [
     {
-      title: 'Réservations complétées',
+      title: 'Réservations terminées',
       value: completed,
       change: 0,
       icon: 'check',
       className: 'text-bg-success',
     },
-    {
-      title: 'Réservations en attente',
-      value: pending,
-      change: 0,
-      icon: 'hourglass',
-      className: 'text-bg-warning',
-    },
+    // {
+    //   title: 'Réservations en attente',
+    //   value: pending,
+    //   change: 0,
+    //   icon: 'hourglass',
+    //   className: 'text-bg-warning',
+    // },
     {
       title: 'Réservations annulées',
       value: cancelled,

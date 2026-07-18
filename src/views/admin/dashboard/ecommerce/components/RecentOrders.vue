@@ -1,26 +1,33 @@
 <template>
   <BCard no-body data-table data-table-rows-per-page="7">
     <div class="card-header justify-content-between align-items-center border-dashed">
-      <h4 class="card-title mb-0">Recent Orders</h4>
+      <h4 class="card-title mb-0">Commandes récentes</h4>
       <div class="d-flex gap-2">
-        <RouterLink to="/apps/ecommerce/order-add" class="btn btn-sm btn-soft-secondary"> <IconifyIcon icon="tabler:plus" class="me-1" /> Add Order </RouterLink>
-        <RouterLink to="/apps/ecommerce/orders" class="btn btn-sm btn-primary"> <IconifyIcon icon="tabler:shopping-cart" class="me-1" /> Orders </RouterLink>
+        <!-- <RouterLink to="/apps/ecommerce/order-add" class="btn btn-sm btn-soft-secondary">
+          <IconifyIcon icon="tabler:plus" class="me-1" /> 
+        </RouterLink> -->
+        <RouterLink to="/apps/ecommerce/orders" class="btn btn-sm btn-primary">
+          <IconifyIcon icon="tabler:shopping-cart" class="me-1" /> Commandes
+        </RouterLink>
       </div>
     </div>
 
     <BAlert v-if="error" variant="danger" show class="m-3 mb-0">{{ error }}</BAlert>
 
     <BCardBody class="p-0">
-      <BTable small hover :busy="loading" show-empty empty-text="No reservations found." :fields="fields" :items="orders" :per-page="perPage" :current-page="currentPage" responsive thead-class="d-none" class="table table-centered table-custom table-nowrap mb-0">
+      <BTable small hover :busy="loading" show-empty empty-text="No reservations found." :fields="fields"
+        :items="orders" :per-page="perPage" :current-page="currentPage" responsive thead-class="d-none"
+        class="table table-centered table-custom table-nowrap mb-0">
         <template #cell(id)="{ item }">
           <div class="d-flex align-items-center">
-            <div class="avatar-sm rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2">
+            <div
+              class="avatar-sm rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2">
               <IconifyIcon icon="tabler:user" class="fs-lg" />
             </div>
             <div>
-              <span class="text-muted fs-xs">{{ item.customerName }}</span>
+              <span class="text-muted fs-xs">#{{ item.referenceCode }}</span>
               <h5 class="fs-base mb-0">
-                <RouterLink to="/apps/ecommerce/orders" class="text-body">#{{ item.id }}</RouterLink>
+                <RouterLink to="/apps/ecommerce/orders" class="text-body">{{ item.clientName }}</RouterLink>
               </h5>
             </div>
           </div>
@@ -38,7 +45,7 @@
 
         <template #cell(amount)="data">
           <span class="text-muted fs-xs">Amount</span>
-          <h5 class="fs-base mb-0 fw-normal">{{ formatAmount(data.item.totalAmount) }}</h5>
+          <h5 class="fs-base mb-0 fw-normal">{{ formatAmount(data.item.totalPrice) }}</h5>
         </template>
 
         <template #cell(statusvariant)="{ item }">
@@ -122,7 +129,7 @@ const loadRecentReservations = async () => {
     orders.value = await getLatestReservations(perPage.value)
   } catch (err) {
     console.error('[dashboard] Failed to load recent reservations', err)
-    error.value = err instanceof Error ? err.message : 'Impossible de charger les dernières réservations.'
+    error.value = err instanceof Error ? err.message : 'Impossible de charger les dernières commandes.'
   } finally {
     loading.value = false
   }

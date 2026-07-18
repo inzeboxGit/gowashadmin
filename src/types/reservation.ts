@@ -19,7 +19,7 @@ export type ServiceSnapshot = {
   price: number
   status: string
   totalPrice: number
-  updatedAt: string | Date | any
+  updatedAt: string | Date | unknown
   userId: string
   vehicleCategory: string
   washerId: string
@@ -44,7 +44,7 @@ export type Reservation = {
   clientId?: string
   clientLocation?: ClientLocation
   clientSnapshot?: ClientSnapshot
-  createdAt?: any // Firebase Timestamp or string
+  createdAt?: unknown // Firebase Timestamp or string
   customerId?: string
   laveurId?: string
   packageId?: string
@@ -56,7 +56,7 @@ export type Reservation = {
   progressLabel?: string
   referenceCode?: string
   scheduledAt?: string
-  selectedAddons?: any[]
+  selectedAddons?: unknown[]
   serviceSnapshot?: ServiceSnapshot
   washerSnapshot?: WasherSnapshot
 }

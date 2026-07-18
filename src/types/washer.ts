@@ -76,6 +76,42 @@ export type WasherDocuments = {
   motive?: string
 }
 
+export type VerificationStatus = 'pending' | 'approved' | 'rejected'
+
+export type WasherVerification = {
+  bankDetails?: {
+    iban?: string
+    provided?: boolean
+    raison?: string
+    ribFileName?: string
+    ribFileType?: string
+    ribStoragePath?: string
+    ribUrl?: string
+    status?: VerificationStatus | string
+  }
+  identityDocument?: {
+    backFileName?: string
+    backImageUrl?: string
+    backStoragePath?: string
+    frontFileName?: string
+    frontImageUrl?: string
+    frontStoragePath?: string
+    provided?: boolean
+    raison?: string
+    status?: VerificationStatus | string
+  }
+  siret?: string
+  siretRaison?: string
+  siretStatus?: VerificationStatus | string
+  status?: VerificationStatus | string
+  submittedAt?: any
+  vat?: {
+    applicable?: boolean
+    rate?: number
+    status?: string
+  }
+}
+
 export type Washer = {
   id: string
   createdAt?: string
@@ -87,6 +123,7 @@ export type Washer = {
   laveurData?: LaveurData
   laveurProfile?: LaveurProfile
   documents?: WasherDocuments
+  verification?: WasherVerification
   location?: WasherLocation
   phoneNumber?: string
   platform?: string

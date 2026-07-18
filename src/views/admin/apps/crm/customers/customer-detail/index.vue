@@ -80,7 +80,7 @@
                <Icon icon="shopping-bag" class="text-primary fs-5" />
                <div class="lh-sm">
                  <div class="fw-bold fs-6">{{ reservations.length }}</div>
-                 <div class="text-muted fs-xs text-uppercase letter-spacing-1">Réservations</div>
+                 <div class="text-muted fs-xs text-uppercase letter-spacing-1">Commandes</div>
                </div>
              </div>
              <div class="d-flex align-items-center gap-2">

@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <PageBreadcrumb title="eCommerce" subtitle="Dashboard" />
+  <PageBreadcrumb title="Tableau de bord" subtitle="Dashboard" />
 
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
     <h5 class="mb-0">Vue globale</h5>

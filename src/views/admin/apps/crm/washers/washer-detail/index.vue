@@ -27,25 +27,18 @@
       </RouterLink>
 
       <div class="d-flex gap-2">
-        <button 
-          v-if="washer.isVerified !== false" 
-          class="btn btn-danger d-flex align-items-center gap-2" 
-          @click="suspendWasher"
-        >
+        <button v-if="washer.isVerified !== false" class="btn btn-danger d-flex align-items-center gap-2"
+          @click="suspendWasher">
           <Icon icon="ban" class="fs-sm" /> Suspendre
         </button>
-        <button 
-          v-else 
-          class="btn btn-success d-flex align-items-center gap-2" 
-          @click="reactivateWasher"
-        >
+        <button v-else class="btn btn-success d-flex align-items-center gap-2" @click="reactivateWasher">
           <Icon icon="check-circle" class="fs-sm" /> Réactiver
         </button>
-        
+
         <button class="btn btn-warning d-flex align-items-center gap-2" @click="showModerationModal = true">
           <Icon icon="shield-check" class="fs-sm" /> Modération
         </button>
-        
+
         <button class="btn btn-outline-danger d-flex align-items-center gap-2 ms-2" @click="deleteWasher">
           <Icon icon="trash-2" class="fs-sm" /> Supprimer
         </button>
@@ -55,28 +48,21 @@
     <!-- Hero Banner Minimalist -->
     <div class="minimal-hero mb-4">
       <div class="hero-cover rounded-4 overflow-hidden position-relative bg-light">
-        <img
-          v-if="washer.laveurProfile?.bannerUrl"
-          :src="washer.laveurProfile.bannerUrl"
-          class="w-100 h-100 object-fit-cover"
-          alt="banner"
-        />
+        <img v-if="washer.laveurProfile?.bannerUrl" :src="washer.laveurProfile.bannerUrl"
+          class="w-100 h-100 object-fit-cover" alt="banner" />
         <div class="hero-gradient-overlay"></div>
       </div>
-      
+
       <div class="hero-content d-flex flex-column flex-md-row align-items-md-end px-4">
         <div class="hero-avatar shadow-sm bg-white rounded-circle p-1 flex-shrink-0">
-          <img
-            v-if="washer.laveurProfile?.logoUrl"
-            :src="washer.laveurProfile.logoUrl"
-            class="rounded-circle w-100 h-100 object-fit-cover"
-            alt="logo"
-          />
-          <div v-else class="w-100 h-100 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fs-1 fw-bold">
+          <img v-if="washer.laveurProfile?.logoUrl" :src="washer.laveurProfile.logoUrl"
+            class="rounded-circle w-100 h-100 object-fit-cover" alt="logo" />
+          <div v-else
+            class="w-100 h-100 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fs-1 fw-bold">
             {{ washer.fullName?.charAt(0) || 'L' }}
           </div>
         </div>
-        
+
         <div class="hero-text pt-3 pt-md-0 ms-md-4 flex-grow-1 pb-1">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
             <div>
@@ -89,51 +75,94 @@
                   <Icon icon="ban" />
                 </span>
               </h3>
-              <p class="text-muted mb-2 mb-md-0 max-w-600">{{ washer.laveurProfile?.description || 'Aucune description disponible.' }}</p>
+              <p class="text-muted mb-2 mb-md-0 max-w-600">
+                {{ washer.laveurProfile?.description || 'Aucune description disponible.' }}</p>
             </div>
-            
+
             <div class="d-flex gap-2 align-items-center">
-               <span class="badge" :class="washer.laveurData?.isAvailable === 'On' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
-                 <span class="availability-dot me-1" :class="washer.laveurData?.isAvailable === 'On' ? 'dot-on' : 'dot-off'"></span>
-                 {{ washer.laveurData?.isAvailable === 'On' ? 'Disponible' : 'Indisponible' }}
-               </span>
-               <span v-if="washer.platform" class="badge bg-light text-dark text-capitalize border">{{ washer.platform }}</span>
+              <span class="badge"
+                :class="washer.laveurData?.isAvailable === 'On' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                <span class="availability-dot me-1"
+                  :class="washer.laveurData?.isAvailable === 'On' ? 'dot-on' : 'dot-off'"></span>
+                {{ washer.laveurData?.isAvailable === 'On' ? 'Disponible' : 'Indisponible' }}
+              </span>
+              <span v-if="washer.platform" class="badge bg-light text-dark text-capitalize border">{{ washer.platform
+              }}</span>
             </div>
           </div>
-          
+
           <!-- Key Stats inline -->
           <div class="d-flex align-items-center gap-4 mt-3 pt-2 border-top border-light-subtle">
-             <div class="d-flex align-items-center gap-2">
-               <Icon icon="star" class="text-warning fs-5" />
-               <div class="lh-sm">
-                 <div class="fw-bold fs-6">{{ washer.laveurData?.rating?.toFixed(1) || '0.0' }}</div>
-                 <div class="text-muted fs-xs text-uppercase letter-spacing-1">Note</div>
-               </div>
-             </div>
-             <div class="d-flex align-items-center gap-2">
-               <Icon icon="check-circle" class="text-success fs-5" />
-               <div class="lh-sm">
-                 <div class="fw-bold fs-6">{{ washer.laveurData?.completedJobs || 0 }}</div>
-                 <div class="text-muted fs-xs text-uppercase letter-spacing-1">Jobs</div>
-               </div>
-             </div>
-             <div class="d-flex align-items-center gap-2">
-               <Icon icon="eye" class="text-info fs-5" />
-               <div class="lh-sm">
-                 <div class="fw-bold fs-6">{{ washer.laveurData?.profileViews || 0 }}</div>
-                 <div class="text-muted fs-xs text-uppercase letter-spacing-1">Vues</div>
-               </div>
-             </div>
+            <div class="d-flex align-items-center gap-2">
+              <Icon icon="star" class="text-warning fs-5" />
+              <div class="lh-sm">
+                <div class="fw-bold fs-6">{{ washer.laveurData?.rating?.toFixed(1) || '0.0' }}</div>
+                <div class="text-muted fs-xs text-uppercase letter-spacing-1">Note</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <Icon icon="check-circle" class="text-success fs-5" />
+              <div class="lh-sm">
+                <div class="fw-bold fs-6">{{ washer.laveurData?.completedJobs || 0 }}</div>
+                <div class="text-muted fs-xs text-uppercase letter-spacing-1">Jobs</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <Icon icon="eye" class="text-info fs-5" />
+              <div class="lh-sm">
+                <div class="fw-bold fs-6">{{ washer.laveurData?.profileViews || 0 }}</div>
+                <div class="text-muted fs-xs text-uppercase letter-spacing-1">Vues</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Stat cards -->
+    <BRow class="g-4 mb-4">
+      <BCol md="6" xl="3">
+        <BCard class="text-center">
+          <Icon icon="dollar-sign" class="fs-2 text-success mb-3" />
+          <h4 v-if="!isLoadingStats" class="mb-1 fw-bold">{{ totalRevenue }} €</h4>
+          <div v-else class="spinner-border spinner-border-sm text-primary"></div>
+          <p class="text-muted mb-0">Chiffre d'affaire</p>
+        </BCard>
+      </BCol>
+      <BCol md="6" xl="3">
+        <BCard class="text-center">
+          <Icon icon="credit-card" class="fs-2 text-primary mb-3" />
+          <h4 v-if="!isLoadingStats" class="mb-1 fw-bold">{{ confirmedPayments }} €</h4>
+          <div v-else class="spinner-border spinner-border-sm text-primary"></div>
+          <p class="text-muted mb-0">Paiement confirmé</p>
+        </BCard>
+      </BCol>
+      <BCol md="6" xl="3">
+        <BCard class="text-center">
+          <Icon icon="slash" class="fs-2 text-danger mb-3" />
+          <h4 v-if="!isLoadingStats" class="mb-1 fw-bold">{{ canceledPayments }} €</h4>
+          <div v-else class="spinner-border spinner-border-sm text-primary"></div>
+          <p class="text-muted mb-0">Paiement annulé</p>
+        </BCard>
+      </BCol>
+      <BCol md="6" xl="3">
+        <BCard class="text-center">
+          <Icon icon="check-square" class="fs-2 text-info mb-3" />
+          <h4 v-if="!isLoadingStats" class="mb-1 fw-bold">{{ completedOrders }}</h4>
+          <div v-else class="spinner-border spinner-border-sm text-primary"></div>
+          <p class="text-muted mb-0">Commandes terminées</p>
+        </BCard>
+      </BCol>
+
+    </BRow>
+
     <BRow class="g-4">
       <BCol lg="4">
         <!-- Contact & Info -->
         <div class="minimal-card mb-4">
-          <h6 class="fw-bold mb-4 d-flex align-items-center"><Icon icon="user" class="me-2 text-muted" /> Informations</h6>
+          <h6 class="fw-bold mb-4 d-flex align-items-center">
+            <Icon icon="user" class="me-2 text-muted" /> Informations
+          </h6>
           <div class="info-list-minimal">
             <div class="info-item">
               <span class="info-lbl fw-bold">Email</span>
@@ -144,7 +173,7 @@
               <span class="info-val fw-medium">{{ washer.phoneNumber || '—' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-lbl fw-bold">Zone d'intervention</span>
+              <span class="info-lbl fw-bold">Adresse</span>
               <span class="info-val fw-medium">{{ washer.location?.address || '—' }}</span>
             </div>
             <div class="info-item">
@@ -154,7 +183,8 @@
             <div class="info-item border-0 pb-0">
               <span class="info-lbl mb-2 fw-bold">Types d'interventions (Services proposés)</span>
               <div class="d-flex gap-2 flex-wrap">
-                <span v-for="t in washer.laveurData?.businessTypes" :key="t" class="badge bg-light text-dark border px-2 py-1">
+                <span v-for="t in washer.laveurData?.businessTypes" :key="t"
+                  class="badge bg-light text-dark border px-2 py-1">
                   <Icon :icon="t === 'car' ? 'car' : 'home'" class="me-1 text-muted" />
                   {{ t === 'car' ? 'Véhicule' : 'Domicile' }}
                 </span>
@@ -166,11 +196,13 @@
 
         <!-- Services checklist (Tags) -->
         <div class="minimal-card mb-4">
-          <h6 class="fw-bold mb-4 d-flex align-items-center"><Icon icon="check-square" class="me-2 text-muted" /> Compétences</h6>
+          <h6 class="fw-bold mb-4 d-flex align-items-center">
+            <Icon icon="check-square" class="me-2 text-muted" /> Compétences
+          </h6>
           <div v-if="washer.laveurData?.services?.length" class="d-flex flex-wrap gap-2">
-             <div v-for="s in washer.laveurData.services" :key="s" class="skill-tag">
-               {{ s }}
-             </div>
+            <div v-for="s in washer.laveurData.services" :key="s" class="skill-tag">
+              {{ s }}
+            </div>
           </div>
           <p v-else class="text-muted fs-sm mb-0">Aucune compétence listée.</p>
         </div>
@@ -180,15 +212,20 @@
         <!-- Gallery Horizontal Scroll -->
         <div class="minimal-card mb-4">
           <h6 class="fw-bold mb-4 d-flex align-items-center justify-content-between">
-            <span class="d-flex align-items-center"><Icon icon="image" class="me-2 text-muted" /> Galerie</span>
+            <span class="d-flex align-items-center">
+              <Icon icon="image" class="me-2 text-muted" /> Galerie
+            </span>
             <span class="text-muted fs-sm fw-normal">{{ washer.laveurProfile?.galleryUrls?.length || 0 }} photos</span>
           </h6>
-          
+
           <div v-if="washer.laveurProfile?.galleryUrls?.length" class="gallery-scroll">
             <div v-for="(img, i) in washer.laveurProfile.galleryUrls" :key="i" class="gallery-img-wrap">
               <img :src="img" class="gallery-img" @click="openImage(img)" />
-              <div class="gallery-hover" @click="openImage(img)"><Icon icon="zoom-in" class="fs-4 text-white" /></div>
-              <button class="btn btn-danger gallery-delete-btn shadow-sm" @click.stop="handleDeletePhoto(img, i)" title="Supprimer la photo">
+              <div class="gallery-hover" @click="openImage(img)">
+                <Icon icon="zoom-in" class="fs-4 text-white" />
+              </div>
+              <button class="btn btn-danger gallery-delete-btn shadow-sm" @click.stop="handleDeletePhoto(img, i)"
+                title="Supprimer la photo">
                 <Icon icon="trash-2" class="fs-xs" />
               </button>
             </div>
@@ -199,7 +236,9 @@
         <!-- Addons & Services Harmonized -->
         <div class="minimal-card mb-4">
           <h6 class="fw-bold mb-4 d-flex align-items-center justify-content-between">
-            <span class="d-flex align-items-center"><Icon icon="layers" class="me-2 text-muted" /> Offres & Options</span>
+            <span class="d-flex align-items-center">
+              <Icon icon="layers" class="me-2 text-muted" /> Offres & Options
+            </span>
           </h6>
 
           <div v-if="loadingServices || loadingAddons" class="text-center py-4">
@@ -213,8 +252,11 @@
               <div class="sa-grid-minimal">
                 <div v-for="item in services" :key="item.id" class="sa-card-minimal">
                   <div class="sa-card-top">
-                    <div class="sa-icon-minimal bg-success-subtle text-success"><Icon icon="package" /></div>
-                    <span class="badge" :class="item.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                    <div class="sa-icon-minimal bg-success-subtle text-success">
+                      <Icon icon="package" />
+                    </div>
+                    <span class="badge"
+                      :class="item.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
                       {{ item.published ? 'Actif' : 'Inactif' }}
                     </span>
                   </div>
@@ -224,13 +266,15 @@
                   </div>
                   <div class="sa-card-footer mt-auto pt-3">
                     <div class="sa-price-minimal mb-3">
-                      {{ item.prices && Object.keys(item.prices).length ? Math.min(...Object.values(item.prices)) + ' MAD' : '— MAD' }}
+                      {{ item.prices && Object.keys(item.prices).length ? Math.min(...Object.values(item.prices)) +
+                        'MAD' : '— MAD' }}
                     </div>
                     <div class="mt-auto d-flex gap-2">
                       <button class="btn btn-sm btn-light flex-grow-1" @click="openDetail('service', item)">
                         Voir détail
                       </button>
-                      <button class="btn btn-sm btn-outline-danger px-3" @click="handleDeleteService(item)" title="Supprimer ce service">
+                      <button class="btn btn-sm btn-outline-danger px-3" @click="handleDeleteService(item)"
+                        title="Supprimer ce service">
                         <Icon icon="trash-2" />
                       </button>
                     </div>
@@ -245,8 +289,11 @@
               <div class="sa-grid-minimal">
                 <div v-for="item in addons" :key="item.id" class="sa-card-minimal">
                   <div class="sa-card-top">
-                    <div class="sa-icon-minimal bg-primary-subtle text-primary"><Icon icon="plus" /></div>
-                    <span class="badge" :class="item.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                    <div class="sa-icon-minimal bg-primary-subtle text-primary">
+                      <Icon icon="plus" />
+                    </div>
+                    <span class="badge"
+                      :class="item.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
                       {{ item.published ? 'Actif' : 'Inactif' }}
                     </span>
                   </div>
@@ -260,7 +307,8 @@
                       <button class="btn btn-sm btn-light flex-grow-1" @click="openDetail('addon', item)">
                         Voir détail
                       </button>
-                      <button class="btn btn-sm btn-outline-danger px-3" @click="handleDeleteAddon(item)" title="Supprimer cet addon">
+                      <button class="btn btn-sm btn-outline-danger px-3" @click="handleDeleteAddon(item)"
+                        title="Supprimer cet addon">
                         <Icon icon="trash-2" />
                       </button>
                     </div>
@@ -269,7 +317,7 @@
               </div>
             </div>
           </div>
-          
+
           <p v-else class="text-muted fs-sm mb-0">Aucun forfait ou option configuré.</p>
         </div>
 
@@ -282,24 +330,18 @@
         <div class="minimal-card p-0 overflow-hidden mb-4">
           <!-- Custom Tabs Header -->
           <div class="d-flex border-bottom bg-light-subtle px-4 pt-3 gap-4 custom-tabs">
-            <button 
-              class="btn-tab pb-3 fw-bold d-flex align-items-center" 
-              :class="{ 'active': activeTab === 'avis' }"
-              @click="activeTab = 'avis'"
-            >
-              <Icon icon="message-square" class="me-2" /> Avis Clients 
+            <button class="btn-tab pb-3 fw-bold d-flex align-items-center" :class="{ 'active': activeTab === 'avis' }"
+              @click="activeTab = 'avis'">
+              <Icon icon="message-square" class="me-2" /> Avis Clients
               <span class="badge rounded-pill bg-warning text-white ms-2">{{ reviews.length }}</span>
             </button>
-            <button 
-              class="btn-tab pb-3 fw-bold d-flex align-items-center" 
-              :class="{ 'active': activeTab === 'commandes' }"
-              @click="activeTab = 'commandes'"
-            >
-              <Icon icon="shopping-bag" class="me-2" /> Commandes 
+            <button class="btn-tab pb-3 fw-bold d-flex align-items-center"
+              :class="{ 'active': activeTab === 'commandes' }" @click="activeTab = 'commandes'">
+              <Icon icon="shopping-bag" class="me-2" /> Commandes
               <span class="badge rounded-pill bg-info text-white ms-2">{{ reservations.length }}</span>
             </button>
           </div>
-          
+
           <div class="p-4">
             <!-- Avis Tab -->
             <div v-show="activeTab === 'avis'">
@@ -313,30 +355,35 @@
                 </div>
               </div>
 
-              <div v-if="loadingReviews" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
-              
+              <div v-if="loadingReviews" class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+
               <div v-else-if="reviews.length" class="review-list-minimal">
                 <div v-for="(review, i) in reviews" :key="i" class="review-item-minimal pb-3 mb-3 border-bottom">
                   <div class="d-flex align-items-start gap-3">
-                    <img v-if="review.clientPhoto" :src="review.clientPhoto" class="rounded-circle w-32 h-32 object-fit-cover flex-shrink-0" />
-                    <div v-else class="w-32 h-32 rounded-circle bg-light d-flex align-items-center justify-content-center text-muted fs-xs fw-bold flex-shrink-0">
+                    <img v-if="review.clientPhoto" :src="review.clientPhoto"
+                      class="rounded-circle w-32 h-32 object-fit-cover flex-shrink-0" />
+                    <div v-else
+                      class="w-32 h-32 rounded-circle bg-light d-flex align-items-center justify-content-center text-muted fs-xs fw-bold flex-shrink-0">
                       {{ review.clientName?.charAt(0) || 'C' }}
                     </div>
                     <div class="flex-grow-1">
                       <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="fw-semibold fs-sm">{{ review.clientName || 'Client' }}</div>
                         <div class="d-flex gap-1">
-                          <Icon v-for="n in 5" :key="n" icon="star" class="fs-xs" :class="n <= (review.rating || 0) ? 'text-warning' : 'text-muted opacity-25'" />
+                          <Icon v-for="n in 5" :key="n" icon="star" class="fs-xs"
+                            :class="n <= (review.rating || 0) ? 'text-warning' : 'text-muted opacity-25'" />
                         </div>
                       </div>
                       <div class="text-muted fs-xs mb-2">{{ formatDate(review.createdAt) }}</div>
-                      <p class="mb-2 fs-sm text-dark" :class="{ 'text-decoration-line-through opacity-50': review.isVisible === false }">{{ review.comment }}</p>
+                      <p class="mb-2 fs-sm text-dark"
+                        :class="{ 'text-decoration-line-through opacity-50': review.isVisible === false }">{{
+                          review.comment }}</p>
                       <div class="d-flex justify-content-end gap-2 mt-1">
-                        <button 
-                          class="btn btn-sm fs-xs py-1" 
-                          :class="review.isVisible !== false ? 'btn-outline-warning' : 'btn-outline-success'" 
-                          @click="toggleReviewVisibility(review)"
-                        >
+                        <button class="btn btn-sm fs-xs py-1"
+                          :class="review.isVisible !== false ? 'btn-outline-warning' : 'btn-outline-success'"
+                          @click="toggleReviewVisibility(review)">
                           <Icon :icon="review.isVisible !== false ? 'eye-off' : 'eye'" class="me-1" />
                           {{ review.isVisible !== false ? 'Masquer' : 'Afficher' }}
                         </button>
@@ -350,14 +397,14 @@
               </div>
               <p v-else class="text-muted fs-sm mb-0">Aucun avis laissé pour le moment.</p>
             </div>
-            
+
             <!-- Commandes Tab -->
             <div v-show="activeTab === 'commandes'">
               <div v-if="loadingReservations" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
                 <div class="text-muted mt-2 fs-sm">Chargement des commandes...</div>
               </div>
-              
+
               <div v-else-if="reservations.length" class="table-responsive">
                 <table class="table table-hover table-custom table-nowrap table-centered mb-0 align-middle">
                   <thead class="bg-light-subtle text-uppercase fs-xxs fw-bold text-muted border-bottom">
@@ -382,12 +429,14 @@
                       </td>
                       <td class="py-3">
                         <div class="d-flex align-items-center gap-2">
-                          <div class="w-32 h-32 rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold fs-xs">
+                          <div
+                            class="w-32 h-32 rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center fw-bold fs-xs">
                             {{ res.clientSnapshot?.fullName?.charAt(0) || 'C' }}
                           </div>
                           <div>
                             <div class="fw-semibold text-dark">{{ res.clientSnapshot?.fullName || 'Client' }}</div>
-                            <div class="text-muted fs-xs">{{ res.clientSnapshot?.phoneNumber || res.clientSnapshot?.email || '—' }}</div>
+                            <div class="text-muted fs-xs">{{ res.clientSnapshot?.phoneNumber ||
+                              res.clientSnapshot?.email || '—' }}</div>
                           </div>
                         </div>
                       </td>
@@ -403,7 +452,8 @@
                         </span>
                       </td>
                       <td class="py-3">
-                        <span class="badge fs-xxs" :class="getReservationStatusBadgeClass(res.serviceSnapshot?.status || res.status)">
+                        <span class="badge fs-xxs"
+                          :class="getReservationStatusBadgeClass(res.serviceSnapshot?.status || res.status)">
                           {{ translateReservationStatus(res.serviceSnapshot?.status || res.status) }}
                         </span>
                       </td>
@@ -411,11 +461,12 @@
                   </tbody>
                 </table>
               </div>
-              
+
               <div v-else class="text-center py-5">
                 <Icon icon="shopping-bag" class="fs-1 text-muted mb-3 opacity-25" />
                 <h5 class="fw-bold text-dark">Aucune commande</h5>
-                <p class="text-muted fs-sm mx-auto" style="max-width: 400px;">Aucune réservation ou commande n'a été enregistrée pour ce laveur pour le moment.</p>
+                <p class="text-muted fs-sm mx-auto" style="max-width: 400px;">Aucune réservation ou commande n'a été
+                  enregistrée pour ce laveur pour le moment.</p>
               </div>
             </div>
           </div>
@@ -425,27 +476,23 @@
   </div>
 
   <!-- Detail Modal (Addon or Service) -->
-  <BModal
-    v-model="showDetailModal"
-    :title="detailModalType === 'addon' ? 'Détail Option' : 'Détail Forfait'"
-    size="lg"
-    ok-only
-    ok-title="Fermer"
-    ok-variant="light"
-    centered
-  >
+  <BModal v-model="showDetailModal" :title="detailModalType === 'addon' ? 'Détail Option' : 'Détail Forfait'" size="lg"
+    ok-only ok-title="Fermer" ok-variant="light" centered>
     <div v-if="detailModal" class="detail-modal-minimal">
       <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-        <div class="detail-modal-icon" :class="detailModalType === 'addon' ? 'bg-primary-subtle text-primary' : 'bg-success-subtle text-success'">
+        <div class="detail-modal-icon"
+          :class="detailModalType === 'addon' ? 'bg-primary-subtle text-primary' : 'bg-success-subtle text-success'">
           <Icon :icon="detailModalType === 'addon' ? 'plus' : 'package'" class="fs-3" />
         </div>
         <div>
           <h4 class="mb-1 fw-bold">{{ detailModal.name }}</h4>
           <div class="d-flex gap-2">
-            <span class="badge" :class="detailModal.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+            <span class="badge"
+              :class="detailModal.published ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
               {{ detailModal.published ? 'Actif' : 'Inactif' }}
             </span>
-            <span v-if="detailModalType === 'service' && (detailModal as any).isBestOffer" class="badge bg-warning-subtle text-warning">
+            <span v-if="detailModalType === 'service' && (detailModal as any).isBestOffer"
+              class="badge bg-warning-subtle text-warning">
               <Icon icon="star" class="fs-xxs me-1" /> Best Offer
             </span>
           </div>
@@ -454,7 +501,7 @@
 
       <div class="mb-4">
         <h6 class="fw-bold mb-3 text-uppercase fs-xs letter-spacing-1 text-muted">Tarification</h6>
-        
+
         <template v-if="detailModalType === 'addon'">
           <div class="d-flex align-items-baseline gap-2 mb-3">
             <span class="fs-2 fw-bold text-dark">{{ (detailModal as any).basePrice || 0 }}</span>
@@ -473,9 +520,10 @@
             Catégorie: {{ (detailModal as any).vehicleCategory }}
           </div>
         </template>
-        
+
         <template v-else>
-          <div v-if="(detailModal as any).prices && Object.keys((detailModal as any).prices).length" class="d-flex gap-2 flex-wrap">
+          <div v-if="(detailModal as any).prices && Object.keys((detailModal as any).prices).length"
+            class="d-flex gap-2 flex-wrap">
             <div v-for="(price, cat) in (detailModal as any).prices" :key="cat" class="price-chip-minimal">
               <span class="text-muted fs-xs text-capitalize mb-1">{{ cat }}</span>
               <span class="fw-bold fs-6">{{ price }} MAD</span>
@@ -500,36 +548,47 @@
   </BModal>
 
   <!-- Moderation Modal -->
-  <BModal
-    v-model="showModerationModal"
-    title="Modération des documents"
-    size="lg"
-    ok-title="Enregistrer"
-    cancel-title="Annuler"
-    ok-variant="primary"
-    centered
-    @ok="handleModerationSave"
-  >
+  <BModal v-model="showModerationModal" title="Modération des documents" size="lg" ok-title="Enregistrer"
+    cancel-title="Annuler" ok-variant="primary" centered @ok="handleModerationSave">
     <div class="moderation-body">
-      <p class="text-muted mb-4 fs-sm">Vérifiez les documents d'identité et professionnels du laveur. Si vous rejetez un document, veuillez fournir une raison.</p>
+      <p class="text-muted mb-4 fs-sm">Vérifiez les documents d'identité et professionnels du laveur. Si vous rejetez un
+        document, veuillez fournir une raison.</p>
 
       <div class="row g-4">
         <!-- ID Card -->
         <div class="col-12 border-bottom pb-4 mb-1">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h6 class="fw-bold mb-1 d-flex align-items-center"><Icon icon="file-text" class="me-2 text-primary" /> Pièce d'identité (ID)</h6>
+              <h6 class="fw-bold mb-1 d-flex align-items-center">
+                <Icon icon="file-text" class="me-2 text-primary" /> Pièce d'identité (ID)
+              </h6>
               <span class="badge bg-light text-dark fs-xxs">CIN ou Passeport</span>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" @click="openDoc('ID')" :disabled="!washer?.documents?.ID">
-              <Icon icon="eye" class="me-1" /> Voir le doc
-            </button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary" @click="openDoc('IDENTITY_FRONT')"
+                :disabled="!washer?.verification?.identityDocument?.frontImageUrl">
+                <Icon icon="eye" class="me-1" /> Recto
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" @click="openDoc('IDENTITY_BACK')"
+                :disabled="!washer?.verification?.identityDocument?.backImageUrl">
+                <Icon icon="eye" class="me-1" /> Verso
+              </button>
+            </div>
+          </div>
+          <div class="text-muted fs-xs mb-3">
+            {{ washer?.verification?.identityDocument?.frontFileName || 'Recto non fourni' }}
+            <span class="mx-1">/</span>
+            {{ washer?.verification?.identityDocument?.backFileName || 'Verso non fourni' }}
           </div>
           <div class="d-flex gap-2 mb-3">
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.ID.status === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="setModStatus('ID', 'approved')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.ID.status === 'approved' ? 'btn-success' : 'btn-outline-success'"
+              @click="setModStatus('ID', 'approved')">
               <Icon icon="check" class="me-1" /> Approuver
             </button>
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.ID.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="setModStatus('ID', 'rejected')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.ID.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'"
+              @click="setModStatus('ID', 'rejected')">
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
@@ -539,18 +598,31 @@
         <div class="col-12 border-bottom pb-4 mb-1">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h6 class="fw-bold mb-1 d-flex align-items-center"><Icon icon="file-text" class="me-2 text-primary" /> RIB Bancaire</h6>
+              <h6 class="fw-bold mb-1 d-flex align-items-center">
+                <Icon icon="file-text" class="me-2 text-primary" /> RIB Bancaire
+              </h6>
               <span class="badge bg-light text-dark fs-xxs">Relevé d'identité bancaire</span>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" @click="openDoc('RIB')" :disabled="!washer?.documents?.RIB">
+            <button class="btn btn-sm btn-outline-secondary" @click="openDoc('RIB')"
+              :disabled="!washer?.verification?.bankDetails?.ribUrl">
               <Icon icon="eye" class="me-1" /> Voir le doc
             </button>
           </div>
+          <div class="text-muted fs-xs mb-3">
+            {{ washer?.verification?.bankDetails?.ribFileName || 'RIB non fourni' }}
+            <span v-if="washer?.verification?.bankDetails?.iban" class="ms-2">
+              IBAN: {{ washer.verification.bankDetails.iban }}
+            </span>
+          </div>
           <div class="d-flex gap-2 mb-3">
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.RIB.status === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="setModStatus('RIB', 'approved')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.RIB.status === 'approved' ? 'btn-success' : 'btn-outline-success'"
+              @click="setModStatus('RIB', 'approved')">
               <Icon icon="check" class="me-1" /> Approuver
             </button>
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.RIB.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="setModStatus('RIB', 'rejected')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.RIB.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'"
+              @click="setModStatus('RIB', 'rejected')">
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
@@ -560,66 +632,62 @@
         <div class="col-12 border-bottom pb-4 mb-1">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h6 class="fw-bold mb-1 d-flex align-items-center"><Icon icon="file-text" class="me-2 text-primary" /> SIRET</h6>
+              <h6 class="fw-bold mb-1 d-flex align-items-center">
+                <Icon icon="file-text" class="me-2 text-primary" /> SIRET
+              </h6>
               <span class="badge bg-light text-dark fs-xxs">Justificatif professionnel</span>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" @click="openDoc('SIRET')" :disabled="!washer?.documents?.SIRET">
-              <Icon icon="eye" class="me-1" /> Voir le doc
-            </button>
+            <span class="badge bg-light text-dark fs-sm">{{ washer?.verification?.siret || 'Non fourni' }}</span>
           </div>
           <div class="d-flex gap-2 mb-3">
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.SIRET.status === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="setModStatus('SIRET', 'approved')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.SIRET.status === 'approved' ? 'btn-success' : 'btn-outline-success'"
+              @click="setModStatus('SIRET', 'approved')">
               <Icon icon="check" class="me-1" /> Approuver
             </button>
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.SIRET.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="setModStatus('SIRET', 'rejected')">
+            <button class="btn btn-sm flex-grow-1"
+              :class="modStatus.SIRET.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'"
+              @click="setModStatus('SIRET', 'rejected')">
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
         </div>
 
-        <!-- KABIS -->
+        <!-- TVA -->
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h6 class="fw-bold mb-1 d-flex align-items-center"><Icon icon="file-text" class="me-2 text-primary" /> KABIS</h6>
-              <span class="badge bg-light text-dark fs-xxs">Extrait Kbis</span>
+              <h6 class="fw-bold mb-1 d-flex align-items-center">
+                <Icon icon="file-text" class="me-2 text-primary" /> TVA
+              </h6>
+              <span class="badge bg-light text-dark fs-xxs">Information fiscale</span>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" @click="openDoc('KABIS')" :disabled="!washer?.documents?.KABIS">
-              <Icon icon="eye" class="me-1" /> Voir le doc
-            </button>
-          </div>
-          <div class="d-flex gap-2 mb-3">
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.KABIS.status === 'approved' ? 'btn-success' : 'btn-outline-success'" @click="setModStatus('KABIS', 'approved')">
-              <Icon icon="check" class="me-1" /> Approuver
-            </button>
-            <button class="btn btn-sm flex-grow-1" :class="modStatus.KABIS.status === 'rejected' ? 'btn-danger' : 'btn-outline-danger'" @click="setModStatus('KABIS', 'rejected')">
-              <Icon icon="x" class="me-1" /> Rejeter
-            </button>
+            <span class="badge bg-light text-dark fs-sm">
+              {{ washer?.verification?.vat?.status || (washer?.verification?.vat?.applicable ? `TVA applicable :
+              ${washer?.verification?.vat?.rate || 0}%` : 'Non applicable') }}
+            </span>
           </div>
         </div>
       </div>
 
       <!-- Global Reason -->
       <div class="mt-4 border-top pt-4">
-        <label class="form-label fw-bold d-flex align-items-center gap-2" :class="hasAnyRejection ? 'text-danger' : 'text-dark'">
+        <label class="form-label fw-bold d-flex align-items-center gap-2"
+          :class="hasAnyRejection ? 'text-danger' : 'text-dark'">
           <Icon icon="message-square" class="fs-5" /> Raison / Motif Global
           <span class="badge bg-light text-muted fw-normal ms-auto" v-if="!hasAnyRejection">Facultatif</span>
           <span class="badge bg-danger-subtle text-danger fw-normal ms-auto" v-else>Obligatoire</span>
         </label>
         <p class="text-muted fs-xs mb-2">Un seul motif pour l'ensemble des documents vérifiés.</p>
-        <textarea v-model="globalReason" class="form-control" rows="3" placeholder="Saisissez un motif (ex: Pièce d'identité floue et Kbis de plus de 3 mois)"></textarea>
+        <textarea v-model="globalReason" class="form-control" rows="3"
+          placeholder="Saisissez un motif (ex: pièce d'identité floue ou SIRET invalide)"></textarea>
       </div>
     </div>
   </BModal>
 
   <!-- Modern Confirm Modal -->
-  <BModal
-    v-model="confirmModal.show"
-    hide-header
-    hide-footer
-    centered
-    content-class="border-0 shadow-lg confirm-modal-content"
-  >
+  <BModal v-model="confirmModal.show" hide-header hide-footer centered
+    content-class="border-0 shadow-lg confirm-modal-content">
     <div class="text-center p-4">
       <div class="mb-4 d-flex justify-content-center">
         <div class="confirm-icon-wrapper" :class="`bg-${confirmModal.variant}-subtle text-${confirmModal.variant}`">
@@ -628,10 +696,12 @@
       </div>
       <h4 class="fw-bold mb-3">{{ confirmModal.title }}</h4>
       <p class="text-muted mb-4 fs-sm">{{ confirmModal.message }}</p>
-      
+
       <div class="d-flex justify-content-center gap-3">
-        <button class="btn btn-light px-4 fw-medium" @click="confirmModal.show = false">{{ confirmModal.cancelText }}</button>
-        <button class="btn px-4 fw-medium" :class="`btn-${confirmModal.variant}`" @click="confirmModal.onConfirm">{{ confirmModal.confirmText }}</button>
+        <button class="btn btn-light px-4 fw-medium" @click="confirmModal.show = false">{{ confirmModal.cancelText
+        }}</button>
+        <button class="btn px-4 fw-medium" :class="`btn-${confirmModal.variant}`" @click="confirmModal.onConfirm">{{
+          confirmModal.confirmText }}</button>
       </div>
     </div>
   </BModal>
@@ -650,15 +720,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { BCard, BCardHeader, BCol, BRow, BModal } from 'bootstrap-vue-next'
+import { BCol, BRow, BModal } from 'bootstrap-vue-next'
+import type { BvTriggerableEvent } from 'bootstrap-vue-next'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import Icon from '~/components/wrappers/Icon.vue'
-import { 
-  getWasherById, getWasherReviews, getWasherAddons, getWasherServices, 
+import {
+  getWasherById, getWasherReviews, getWasherAddons, getWasherServices,
   updateWasher, deleteWasher as apiDeleteWasher,
-  deleteWasherAddon, deleteWasherService, updateWasherReview, deleteWasherReview 
+  deleteWasherAddon, deleteWasherService, updateWasherReview, deleteWasherReview
 } from '~/services/washers.service'
 import { getReservationsByWasherId } from '~/services/reservations.service'
+import { useWasherStats } from '~/composables/useWasherStats'
 import type { Washer, WasherReview, WasherAddon, WasherService } from '~/types/washer'
 import type { Reservation } from '~/types/reservation'
 
@@ -675,6 +747,15 @@ const reservations = ref<Reservation[]>([])
 const lightboxImage = ref<string | null>(null)
 const loadingReservations = ref(false)
 
+// Washer Stats
+const {
+  totalRevenue,
+  confirmedPayments,
+  canceledPayments,
+  completedOrders,
+  isLoading: isLoadingStats
+} = useWasherStats(route.params.id as string)
+
 // Tabs State
 const activeTab = ref<'avis' | 'commandes'>('avis')
 
@@ -686,12 +767,11 @@ const modStatus = ref({
   ID: { status: 'pending' },
   RIB: { status: 'pending' },
   SIRET: { status: 'pending' },
-  KABIS: { status: 'pending' },
 })
 
 const hasAnyRejection = computed(() => Object.values(modStatus.value).some(doc => doc.status === 'rejected'))
 
-const setModStatus = (doc: 'ID' | 'RIB' | 'SIRET' | 'KABIS', status: 'approved' | 'rejected') => {
+const setModStatus = (doc: 'ID' | 'RIB' | 'SIRET', status: 'approved' | 'rejected') => {
   modStatus.value[doc].status = status
 }
 
@@ -702,7 +782,7 @@ const confirmModal = ref({
   message: '',
   variant: 'primary' as 'primary' | 'danger' | 'success',
   icon: '',
-  onConfirm: () => {},
+  onConfirm: () => { },
   cancelText: 'Annuler',
   confirmText: 'Confirmer'
 })
@@ -892,12 +972,12 @@ const handleDeletePhoto = (img: string, index: number) => {
     confirmText: 'Supprimer',
     onConfirm: async () => {
       if (!washer.value || !washer.value.laveurProfile?.galleryUrls) return
-      
+
       const newGallery = [...washer.value.laveurProfile.galleryUrls]
       newGallery.splice(index, 1)
 
       try {
-        await updateWasher(washer.value.id, { 
+        await updateWasher(washer.value.id, {
           laveurProfile: { ...washer.value.laveurProfile, galleryUrls: newGallery }
         })
         washer.value.laveurProfile.galleryUrls = newGallery
@@ -910,34 +990,55 @@ const handleDeletePhoto = (img: string, index: number) => {
   })
 }
 
-const openDoc = (doc: 'ID' | 'RIB' | 'SIRET' | 'KABIS') => {
-  const url = washer.value?.documents?.[doc]
+const openDoc = (doc: 'IDENTITY_FRONT' | 'IDENTITY_BACK' | 'RIB') => {
+  const verification = washer.value?.verification
+  const urlByDoc = {
+    IDENTITY_FRONT: verification?.identityDocument?.frontImageUrl,
+    IDENTITY_BACK: verification?.identityDocument?.backImageUrl,
+    RIB: verification?.bankDetails?.ribUrl,
+  }
+  const url = urlByDoc[doc]
   if (url) window.open(url, '_blank')
 }
 
-const handleModerationSave = async (e: Event) => {
+const handleModerationSave = async (e: BvTriggerableEvent) => {
   // Save takes effect only here
   if (hasAnyRejection.value && !globalReason.value.trim()) {
     e.preventDefault()
     alert('Veuillez fournir un motif global, car au moins un document a été rejeté.')
     return
   }
-  
-  const getStatusBool = (status: string) => status === 'approved' ? true : (status === 'rejected' ? false : undefined)
-
-  const updates = {
-    approvedID: getStatusBool(modStatus.value.ID.status),
-    approvedRIB: getStatusBool(modStatus.value.RIB.status),
-    approvedSIRET: getStatusBool(modStatus.value.SIRET.status),
-    approvedKABIS: getStatusBool(modStatus.value.KABIS.status),
-    motive: globalReason.value,
-  }
 
   if (washer.value) {
     try {
-      await updateWasher(washer.value.id, { documents: { ...washer.value.documents, ...updates } })
-      washer.value.documents = { ...washer.value.documents, ...updates }
-      console.log('Saved moderation to documents map in Firebase:', updates)
+      const verification = washer.value.verification || {}
+      const allStatuses = Object.values(modStatus.value).map(doc => doc.status)
+      const verificationStatus = allStatuses.some(status => status === 'rejected')
+        ? 'rejected'
+        : allStatuses.every(status => status === 'approved')
+          ? 'approved'
+          : 'pending'
+
+      const updates = {
+        ...verification,
+        status: verificationStatus,
+        identityDocument: {
+          ...verification.identityDocument,
+          status: modStatus.value.ID.status,
+          raison: modStatus.value.ID.status === 'rejected' ? globalReason.value : '',
+        },
+        bankDetails: {
+          ...verification.bankDetails,
+          status: modStatus.value.RIB.status,
+          raison: modStatus.value.RIB.status === 'rejected' ? globalReason.value : '',
+        },
+        siretStatus: modStatus.value.SIRET.status,
+        siretRaison: modStatus.value.SIRET.status === 'rejected' ? globalReason.value : '',
+      }
+
+      await updateWasher(washer.value.id, { verification: updates })
+      washer.value.verification = updates
+      console.log('Saved moderation to verification map in Firebase:', updates)
     } catch (err) {
       console.error('Error saving moderation:', err)
       alert('Erreur lors de la sauvegarde de la modération.')
@@ -962,14 +1063,17 @@ onMounted(async () => {
   loading.value = false
 
   if (washer.value) {
-    // Populate moderation status from documents map if present
-    const docs = washer.value.documents
-    if (docs) {
-      if (docs.approvedID !== undefined) modStatus.value.ID.status = docs.approvedID ? 'approved' : 'rejected'
-      if (docs.approvedRIB !== undefined) modStatus.value.RIB.status = docs.approvedRIB ? 'approved' : 'rejected'
-      if (docs.approvedSIRET !== undefined) modStatus.value.SIRET.status = docs.approvedSIRET ? 'approved' : 'rejected'
-      if (docs.approvedKABIS !== undefined) modStatus.value.KABIS.status = docs.approvedKABIS ? 'approved' : 'rejected'
-      globalReason.value = docs.motive || ''
+    // Populate moderation status from verification map if present
+    const verification = washer.value.verification
+    if (verification) {
+      modStatus.value.ID.status = verification.identityDocument?.status || 'pending'
+      modStatus.value.RIB.status = verification.bankDetails?.status || 'pending'
+      modStatus.value.SIRET.status = verification.siretStatus || 'pending'
+      globalReason.value =
+        (verification.identityDocument?.status === 'rejected' ? verification.identityDocument?.raison : '') ||
+        (verification.bankDetails?.status === 'rejected' ? verification.bankDetails?.raison : '') ||
+        (verification.siretStatus === 'rejected' ? verification.siretRaison : '') ||
+        ''
     }
 
     loadingReviews.value = true
@@ -1047,18 +1151,29 @@ const openImage = (url: string) => {
 
 <style scoped>
 /* Utility */
-.letter-spacing-1 { letter-spacing: 0.5px; }
-.max-w-600 { max-width: 600px; }
-.w-32 { width: 32px; }
-.h-32 { height: 32px; }
+.letter-spacing-1 {
+  letter-spacing: 0.5px;
+}
+
+.max-w-600 {
+  max-width: 600px;
+}
+
+.w-32 {
+  width: 32px;
+}
+
+.h-32 {
+  height: 32px;
+}
 
 /* Minimalist Core */
 .minimal-card {
   background: white;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  border: 1px solid rgba(0,0,0,0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .btn-back {
@@ -1071,10 +1186,11 @@ const openImage = (url: string) => {
   padding: 8px 16px;
   border-radius: 8px;
   background: white;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   transition: all 0.2s;
 }
+
 .btn-back:hover {
   background: var(--bs-light);
   color: var(--bs-dark);
@@ -1084,20 +1200,24 @@ const openImage = (url: string) => {
 .minimal-hero {
   position: relative;
 }
+
 .hero-cover {
   height: 220px;
 }
+
 .hero-gradient-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
   pointer-events: none;
 }
+
 .hero-content {
   margin-top: -60px;
   position: relative;
   z-index: 2;
 }
+
 .hero-avatar {
   width: 120px;
   height: 120px;
@@ -1109,6 +1229,7 @@ const openImage = (url: string) => {
   display: flex;
   flex-direction: column;
 }
+
 .info-item {
   display: flex;
   flex-direction: column;
@@ -1116,11 +1237,13 @@ const openImage = (url: string) => {
   margin-bottom: 16px;
   border-bottom: 1px dashed var(--bs-border-color);
 }
+
 .info-item:last-child {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
+
 .info-lbl {
   font-size: 12px;
   text-transform: uppercase;
@@ -1128,6 +1251,7 @@ const openImage = (url: string) => {
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
+
 .info-val {
   font-size: 14px;
   color: var(--bs-dark);
@@ -1140,7 +1264,7 @@ const openImage = (url: string) => {
   font-size: 13px;
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* Gallery Horizontal Scroll */
@@ -1151,13 +1275,16 @@ const openImage = (url: string) => {
   padding-bottom: 12px;
   scrollbar-width: thin;
 }
+
 .gallery-scroll::-webkit-scrollbar {
   height: 6px;
 }
+
 .gallery-scroll::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.15);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 10px;
 }
+
 .gallery-img-wrap {
   width: 180px;
   height: 120px;
@@ -1167,17 +1294,31 @@ const openImage = (url: string) => {
   cursor: pointer;
   overflow: hidden;
 }
+
 .gallery-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s;
 }
+
 .gallery-hover {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
 }
-.gallery-img-wrap:hover .gallery-hover { opacity: 1; pointer-events: auto; }
+
+.gallery-img-wrap:hover .gallery-hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .gallery-delete-btn {
   position: absolute;
   top: 8px;
@@ -1194,6 +1335,7 @@ const openImage = (url: string) => {
   transform: scale(0.8);
   transition: all 0.2s;
 }
+
 .gallery-img-wrap:hover .gallery-delete-btn {
   opacity: 1;
   transform: scale(1);
@@ -1203,6 +1345,7 @@ const openImage = (url: string) => {
 .custom-tabs {
   border-bottom: 1px solid var(--bs-border-color);
 }
+
 .btn-tab {
   background: none;
   border: none;
@@ -1210,12 +1353,15 @@ const openImage = (url: string) => {
   position: relative;
   transition: all 0.2s ease-in-out;
 }
+
 .btn-tab:hover {
   color: var(--bs-primary);
 }
+
 .btn-tab.active {
   color: var(--bs-primary);
 }
+
 .btn-tab.active::after {
   content: '';
   position: absolute;
@@ -1233,6 +1379,7 @@ const openImage = (url: string) => {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
+
 .sa-card-minimal {
   background: white;
   border: 1px solid var(--bs-border-color);
@@ -1243,11 +1390,13 @@ const openImage = (url: string) => {
   height: 100%;
   transition: all 0.2s ease;
 }
+
 .sa-card-minimal:hover {
-  border-color: rgba(0,0,0,0.15);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   transform: translateY(-2px);
 }
+
 .sa-icon-minimal {
   width: 32px;
   height: 32px;
@@ -1256,6 +1405,7 @@ const openImage = (url: string) => {
   align-items: center;
   justify-content: center;
 }
+
 .sa-price-minimal {
   font-size: 18px;
   font-weight: 700;
@@ -1271,18 +1421,23 @@ const openImage = (url: string) => {
   align-items: center;
   justify-content: center;
 }
+
 .price-chip-minimal {
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   padding: 8px 16px;
   display: flex;
   flex-direction: column;
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 /* Reviews */
-.review-list-minimal { display: flex; flex-direction: column; }
+.review-list-minimal {
+  display: flex;
+  flex-direction: column;
+}
+
 .review-item-minimal:last-child {
   border-bottom: none !important;
   margin-bottom: 0 !important;
@@ -1292,29 +1447,60 @@ const openImage = (url: string) => {
 /* Availability dot */
 .availability-dot {
   display: inline-block;
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
-.dot-on { background: #22c55e; animation: pulse-green 1.5s infinite; }
-.dot-off { background: #94a3b8; }
+
+.dot-on {
+  background: #22c55e;
+  animation: pulse-green 1.5s infinite;
+}
+
+.dot-off {
+  background: #94a3b8;
+}
+
 @keyframes pulse-green {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(34,197,94,0.25); }
-  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0.1); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.1);
+  }
 }
 
 /* Lightbox */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: fade-in 0.2s;
 }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
 .lightbox-img {
   max-width: 90vw;
   max-height: 90vh;
@@ -1325,6 +1511,7 @@ const openImage = (url: string) => {
 .confirm-modal-content {
   border-radius: 24px !important;
 }
+
 .confirm-icon-wrapper {
   width: 80px;
   height: 80px;
@@ -1336,16 +1523,23 @@ const openImage = (url: string) => {
 
 .lightbox-close {
   position: absolute;
-  top: -20px; right: -20px;
-  width: 40px; height: 40px;
+  top: -20px;
+  right: -20px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: white;
   border: none;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 1;
   transition: transform 0.2s;
 }
-.lightbox-close:hover { transform: scale(1.1); }
+
+.lightbox-close:hover {
+  transform: scale(1.1);
+}
 </style>
