@@ -3,19 +3,15 @@
     <!-- 
     style="background: #fff !important
     -->
-    <RouterLink to="/" class="logo">
-      <span class=" logo logo-light">
-        <!-- <span class="logo-lg"><img src="/images/logo.png" alt="logo" /></span> -->
-        <!-- <span class="logo-sm"><img src="/images/logo-sm.png" alt="small logo" /></span> -->
-        <h1 style="color: #fff !important; height:70px">GoWash</h1>
-        <!-- <br /> -->
-        <!-- <b style="color: #fff !important">Salon Management System</b> -->
+    <RouterLink to="/" class="logo text-decoration-none">
+      <span class="logo logo-light">
+        <span class="logo-lg"><h1 style="color: #fff !important; height:70px; line-height: 70px; margin: 0;">GoWash</h1></span>
+        <span class="logo-sm"><h3 style="color: #fff !important; height:70px; line-height: 70px; margin: 0;">GW</h3></span>
       </span>
 
-      <span class=" logo logo-dark">
-        <!-- <span class="logo-lg"><img src="/images/logo-black.png" alt="dark logo" /></span>
-          <span class="logo-sm"><img src="/images/logo-sm.png" alt="small logo" /></span> -->
-        <h1 style="color: #000 !important">GoWash</h1>
+      <span class="logo logo-dark">
+        <span class="logo-lg"><h1 style="color: #000 !important; height:70px; line-height: 70px; margin: 0;">GoWash</h1></span>
+        <span class="logo-sm"><h3 style="color: #000 !important; height:70px; line-height: 70px; margin: 0;">GW</h3></span>
       </span>
     </RouterLink>
 
