@@ -592,6 +592,10 @@
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
+          <div v-if="modStatus.ID.status === 'rejected'" class="mt-2">
+            <label class="form-label fs-xs fw-bold text-danger">Motif du rejet</label>
+            <textarea v-model="modStatus.ID.raison" class="form-control form-control-sm" rows="2" placeholder="Saisissez un motif..."></textarea>
+          </div>
         </div>
 
         <!-- RIB -->
@@ -626,6 +630,10 @@
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
+          <div v-if="modStatus.RIB.status === 'rejected'" class="mt-2">
+            <label class="form-label fs-xs fw-bold text-danger">Motif du rejet</label>
+            <input v-model="modStatus.RIB.raison" type="text" class="form-control form-control-sm" placeholder="Saisissez un motif..." />
+          </div>
         </div>
 
         <!-- SIRET -->
@@ -651,6 +659,10 @@
               <Icon icon="x" class="me-1" /> Rejeter
             </button>
           </div>
+          <div v-if="modStatus.SIRET.status === 'rejected'" class="mt-2">
+            <label class="form-label fs-xs fw-bold text-danger">Motif du rejet</label>
+            <textarea v-model="modStatus.SIRET.raison" class="form-control form-control-sm" rows="2" placeholder="Saisissez un motif (ex: SIRET invalide)"></textarea>
+          </div>
         </div>
 
         <!-- TVA -->
@@ -668,19 +680,6 @@
             </span>
           </div>
         </div>
-      </div>
-
-      <!-- Global Reason -->
-      <div class="mt-4 border-top pt-4">
-        <label class="form-label fw-bold d-flex align-items-center gap-2"
-          :class="hasAnyRejection ? 'text-danger' : 'text-dark'">
-          <Icon icon="message-square" class="fs-5" /> Raison / Motif Global
-          <span class="badge bg-light text-muted fw-normal ms-auto" v-if="!hasAnyRejection">Facultatif</span>
-          <span class="badge bg-danger-subtle text-danger fw-normal ms-auto" v-else>Obligatoire</span>
-        </label>
-        <p class="text-muted fs-xs mb-2">Un seul motif pour l'ensemble des documents vérifiés.</p>
-        <textarea v-model="globalReason" class="form-control" rows="3"
-          placeholder="Saisissez un motif (ex: pièce d'identité floue ou SIRET invalide)"></textarea>
       </div>
     </div>
   </BModal>
@@ -761,15 +760,12 @@ const activeTab = ref<'avis' | 'commandes'>('avis')
 
 // Moderation modal
 const showModerationModal = ref(false)
-const globalReason = ref('')
 
 const modStatus = ref({
-  ID: { status: 'pending' },
-  RIB: { status: 'pending' },
-  SIRET: { status: 'pending' },
+  ID: { status: 'pending', raison: '' },
+  RIB: { status: 'pending', raison: '' },
+  SIRET: { status: 'pending', raison: '' },
 })
-
-const hasAnyRejection = computed(() => Object.values(modStatus.value).some(doc => doc.status === 'rejected'))
 
 const setModStatus = (doc: 'ID' | 'RIB' | 'SIRET', status: 'approved' | 'rejected') => {
   modStatus.value[doc].status = status
@@ -1003,9 +999,11 @@ const openDoc = (doc: 'IDENTITY_FRONT' | 'IDENTITY_BACK' | 'RIB') => {
 
 const handleModerationSave = async (e: BvTriggerableEvent) => {
   // Save takes effect only here
-  if (hasAnyRejection.value && !globalReason.value.trim()) {
+  if ((modStatus.value.ID.status === 'rejected' && !modStatus.value.ID.raison.trim()) ||
+      (modStatus.value.RIB.status === 'rejected' && !modStatus.value.RIB.raison.trim()) ||
+      (modStatus.value.SIRET.status === 'rejected' && !modStatus.value.SIRET.raison.trim())) {
     e.preventDefault()
-    alert('Veuillez fournir un motif global, car au moins un document a été rejeté.')
+    alert('Veuillez fournir un motif pour chaque document rejeté.')
     return
   }
 
@@ -1025,15 +1023,15 @@ const handleModerationSave = async (e: BvTriggerableEvent) => {
         identityDocument: {
           ...verification.identityDocument,
           status: modStatus.value.ID.status,
-          raison: modStatus.value.ID.status === 'rejected' ? globalReason.value : '',
+          raison: modStatus.value.ID.status === 'rejected' ? modStatus.value.ID.raison : '',
         },
         bankDetails: {
           ...verification.bankDetails,
           status: modStatus.value.RIB.status,
-          raison: modStatus.value.RIB.status === 'rejected' ? globalReason.value : '',
+          raison: modStatus.value.RIB.status === 'rejected' ? modStatus.value.RIB.raison : '',
         },
         siretStatus: modStatus.value.SIRET.status,
-        siretRaison: modStatus.value.SIRET.status === 'rejected' ? globalReason.value : '',
+        siretRaison: modStatus.value.SIRET.status === 'rejected' ? modStatus.value.SIRET.raison : '',
       }
 
       await updateWasher(washer.value.id, { verification: updates })
@@ -1067,13 +1065,11 @@ onMounted(async () => {
     const verification = washer.value.verification
     if (verification) {
       modStatus.value.ID.status = verification.identityDocument?.status || 'pending'
+      modStatus.value.ID.raison = verification.identityDocument?.raison || ''
       modStatus.value.RIB.status = verification.bankDetails?.status || 'pending'
+      modStatus.value.RIB.raison = verification.bankDetails?.raison || ''
       modStatus.value.SIRET.status = verification.siretStatus || 'pending'
-      globalReason.value =
-        (verification.identityDocument?.status === 'rejected' ? verification.identityDocument?.raison : '') ||
-        (verification.bankDetails?.status === 'rejected' ? verification.bankDetails?.raison : '') ||
-        (verification.siretStatus === 'rejected' ? verification.siretRaison : '') ||
-        ''
+      modStatus.value.SIRET.raison = verification.siretRaison || ''
     }
 
     loadingReviews.value = true
