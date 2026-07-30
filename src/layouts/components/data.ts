@@ -133,6 +133,18 @@ export const menuItems: MenuItemType[] = [
         ],
       },
       {
+        'url': '/apps/ecommerce/promos',
+        'icon': 'ticket',
+        'slug': 'pages:apps-ecommerce-promos',
+        'label': 'Codes Promo',
+      },
+      {
+        'url': '/apps/notifications',
+        'icon': 'bell',
+        'slug': 'pages:apps-notifications',
+        'label': 'Notifications',
+      },
+      {
         'url': '/apps/ecommerce/orders',
         'icon': 'shopping-bag',
         'slug': 'pages:apps-ecommerce-orders',

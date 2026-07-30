@@ -118,13 +118,20 @@
             </div>
             <div class="info-item mb-3 d-flex flex-column pb-2 border-bottom border-light">
               <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Téléphone</span>
-              <span class="info-val fw-bold text-dark">{{ client.phoneNumber || '—' }}</span>
+              <span class="info-val fw-bold text-dark d-flex align-items-center gap-2">
+                {{ client.phoneNumber || '—' }}
+                <span v-if="client.phoneVerified" class="badge bg-success-subtle text-success fs-xxs">Vérifié</span>
+                <span v-else class="badge bg-warning-subtle text-warning fs-xxs">Non vérifié</span>
+              </span>
             </div>
             <div class="info-item mb-3 d-flex flex-column pb-2 border-bottom border-light">
-              <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Ville</span>
+              <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Adresse</span>
               <span class="info-val fw-bold text-dark">
                 <Icon icon="map-pin" class="me-1 text-muted" />
-                {{ client.city || '—' }}
+                {{ client.clientAddress?.address || client.city || client.clientAddress?.city || '—' }}
+              </span>
+              <span v-if="client.clientAddress?.city" class="text-muted fs-xs mt-1">
+                {{ client.clientAddress.city }}<span v-if="client.clientAddress.zipCode">, {{ client.clientAddress.zipCode }}</span>
               </span>
             </div>
             <div class="info-item mb-3 d-flex flex-column pb-2 border-bottom border-light">
@@ -132,15 +139,20 @@
               <span class="info-val fw-bold text-dark">{{ client.gender || '—' }}</span>
             </div>
             <div class="info-item mb-3 d-flex flex-column pb-2 border-bottom border-light">
+              <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Rôle</span>
+              <span class="info-val fw-bold text-dark text-capitalize">{{ client.role || 'client' }}</span>
+            </div>
+            <div class="info-item mb-3 d-flex flex-column pb-2 border-bottom border-light">
               <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Date d'inscription</span>
               <span class="info-val text-dark">{{ formatDate(client.createdAt) }}</span>
             </div>
             <div class="info-item d-flex flex-column">
               <span class="info-lbl text-muted fs-xs fw-semibold text-uppercase mb-1">Dernière Connexion</span>
-              <span class="info-val text-dark">{{ formatDate(client.lastLogin) }}</span>
+              <span class="info-val text-dark">{{ formatDate(client.lastLoginAt || client.lastLogin) }}</span>
             </div>
           </div>
         </div>
+
       </BCol>
 
       <!-- Main Tabs Content -->

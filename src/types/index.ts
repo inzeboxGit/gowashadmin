@@ -16,3 +16,6 @@ export type MenuItemType = {
   isSpecial?: boolean
   children?: MenuItemType[]
 }
+
+export * from './promo'
+export * from './push-notification'

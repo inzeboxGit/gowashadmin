@@ -183,6 +183,30 @@ export const allRoutes = [
             component: () => import('~/views/admin/apps/ecommerce/products/products-grid/index.vue')
         },
         {
+            path: '/apps/ecommerce/promos',
+            name: 'apps.ecommerce.promos',
+            meta: { title: 'Promos' },
+            component: () => import('~/views/admin/apps/ecommerce/promo/promos/index.vue')
+        },
+        {
+            path: '/apps/ecommerce/promo-add',
+            name: 'apps.ecommerce.promo-add',
+            meta: { title: 'Add Promo' },
+            component: () => import('~/views/admin/apps/ecommerce/promo/promo-add/index.vue')
+        },
+        {
+            path: '/apps/ecommerce/promo-edit/:id',
+            name: 'apps.ecommerce.promo-edit',
+            meta: { title: 'Edit Promo' },
+            component: () => import('~/views/admin/apps/ecommerce/promo/promo-edit/index.vue')
+        },
+        {
+            path: '/apps/notifications',
+            name: 'apps.notifications',
+            meta: { title: 'Notifications' },
+            component: () => import('~/views/admin/apps/notifications/index.vue')
+        },
+        {
             path: '/apps/ecommerce/refunds',
             name: 'apps.ecommerce.refunds',
             meta: { title: 'Refunds' },

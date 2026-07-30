@@ -14,6 +14,10 @@ const sanitizeProductId = (value: string) => {
     .replace(/^-+|-+$/g, '')
 }
 
+const normalizeBrandName = (value: string) => {
+  return value.trim().toLowerCase().replace(/\s+/g, '_')
+}
+
 const uploadProductImage = async (productId: string, imageFile?: File | null) => {
   if (!imageFile) return ''
 
@@ -56,8 +60,9 @@ export const createProduct = async (input: CreateProductInput) => {
   const now = new Date().toISOString()
 
   const payload: Product = {
-    brandName: input.brandName,
+    brandName: normalizeBrandName(input.brandName),
     category: input.category,
+    ...(input.color !== undefined && { color: input.color }),
     ...(input.condition !== undefined && { condition: input.condition }),
     createdAt: now,
     description: input.description,
@@ -87,8 +92,9 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
   const now = new Date().toISOString()
 
   const fields: Partial<Product> & { updatedAt: string } = {
-    brandName: input.brandName,
+    brandName: normalizeBrandName(input.brandName),
     category: input.category,
+    ...(input.color !== undefined && { color: input.color }),
     ...(input.condition !== undefined && { condition: input.condition }),
     description: input.description,
     discount: input.discount,

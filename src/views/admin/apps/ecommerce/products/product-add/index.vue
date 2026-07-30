@@ -1,13 +1,14 @@
 <template>
-  <PageBreadcrumb title="Add Product" subtitle="Ecommerce" />
+  <PageBreadcrumb title="Ajouter un produit" subtitle="Ecommerce" />
   <BRow class="justify-content-center">
     <BCol xs="12">
       <BRow>
         <BCol xxl="8">
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Product Information</h4>
-              <p class="text-muted mb-0">To add a new product, please provide the necessary details in the fields below.</p>
+              <h4 class="card-title mb-1">Informations sur le produit</h4>
+              <p class="text-muted mb-0">Pour ajouter un nouveau produit, veuillez fournir les informations nécessaires
+                dans les champs ci-dessous.</p>
             </BCardHeader>
 
             <BCardBody>
@@ -17,8 +18,10 @@
               <BRow>
                 <BCol cols="12">
                   <div class="mb-3">
-                    <label for="productName" class="form-label"> Product Name <span class="text-danger">*</span> </label>
-                    <BFormInput id="productName" v-model="form.title" type="text" placeholder="Enter product name" required />
+                    <label for="productName" class="form-label"> Nom du produit <span class="text-danger">*</span>
+                    </label>
+                    <BFormInput id="productName" v-model="form.title" type="text" placeholder="Entrez le nom du produit"
+                      required />
                   </div>
                 </BCol>
 
@@ -52,6 +55,16 @@
 
                 <BCol lg="6">
                   <div class="mb-3">
+                    <label for="color" class="form-label"> Couleur </label>
+                    <BFormInput id="color" v-model="form.color" list="product-color-options" type="text" placeholder="Ex: Bleu marine" autocomplete="off" />
+                    <datalist id="product-color-options">
+                      <option v-for="color in colorOptions" :key="color.value" :value="color.value" :label="color.label" />
+                    </datalist>
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
                     <label for="size" class="form-label"> Taille / Contenance </label>
                     <BFormInput id="size" v-model="form.size" type="text" placeholder="Ex: 1L, 5kg" />
                   </div>
@@ -66,7 +79,8 @@
 
                 <BCol cols="12">
                   <div>
-                    <label for="description" class="form-label"> Product Description <span class="text-muted">(Optional)</span> </label>
+                    <label for="description" class="form-label"> Description du produit <span
+                        class="text-muted">(Optionnel)</span> </label>
                     
                       <QuillEditor v-model:content="form.description" content-type="html" :options="{ toolbar: [['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block', { list: 'ordered' }, 'link', 'image']] }" theme="snow" />
                     
@@ -78,8 +92,9 @@
 
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Product Image</h4>
-              <p class="text-muted mb-0">To upload a product image, please use the option below to select and upload the relevant file.</p>
+              <h4 class="card-title mb-1">Image du produit</h4>
+              <p class="text-muted mb-0">Pour télécharger une image du produit, veuillez utiliser l'option ci-dessous
+                pour sélectionner et télécharger le fichier pertinent.</p>
             </BCardHeader>
 
             <BCardBody>
@@ -95,38 +110,44 @@
         <BCol xxl="4">
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Pricing</h4>
-              <p class="text-muted mb-0">Set the base price and applicable discount for the product using the options below..</p>
+              <h4 class="card-title mb-1">Tarification</h4>
+              <p class="text-muted mb-0">Définissez le prix de base et la remise applicable pour le produit en utilisant
+                les options ci-dessous.</p>
             </BCardHeader>
 
             <BCardBody>
               <div class="mb-3">
                 <label for="basePrice" class="form-label"
-                  >Base Price <span class="text-danger"><span class="text-danger">*</span></span></label
+>Prix de base <span class="text-danger"><span
+                      class="text-danger">*</span></span></label
                 >
                 <div class="app-search">
-                  <BFormInput id="basePrice" v-model.number="form.price" type="number" placeholder="Enter base price (e.g., 199.99)" />
+                  <BFormInput id="basePrice" v-model.number="form.price" type="number"
+                    placeholder="Entrez le prix de base (par ex., 199.99)" />
                   <Icon icon="dollar-sign" class="app-search-icon text-muted" />
                 </div>
               </div>
 
               <div class="mb-3">
-                <label for="discount" class="form-label">Discount Type <span class="text-muted">(Optional)</span></label>
+                <label for="discount" class="form-label">Type de remise <span
+                    class="text-muted">(Optionnel)</span></label>
                 <div class="app-search">
                   <BFormSelect v-model="discountType" id="discount" placeholder="Choose Discount" class="form-control my-1 my-md-0">
-                    <option value="All">Choose Discount</option>
-                    <option value="none">No Discount</option>
-                    <option value="flat">Flat Discount</option>
-                    <option value="percentage">Percentage Discount</option>
+                    <option value="All">Choisir la remise</option>
+                    <option value="none">Pas de remise</option>
+                    <option value="flat">Remise forfaitaire</option>
+                    <option value="percentage">Remise en pourcentage</option>
                   </BFormSelect>
                   <Icon icon="badge-percent" class="app-search-icon text-muted" />
                 </div>
               </div>
 
               <div class="mb-0">
-                <label for="discountValue" class="form-label">Discount Value <span class="text-muted">(Optional)</span></label>
+                <label for="discountValue" class="form-label">Valeur de la remise <span
+                    class="text-muted">(Optionnel)</span></label>
                 <div class="app-search">
-                  <BFormInput id="discountValue" v-model.number="form.discount" type="number" placeholder="Enter discount amount or percentage" />
+                  <BFormInput id="discountValue" v-model.number="form.discount" type="number"
+                    placeholder="Entrez le montant ou le pourcentage de la remise" />
                   <Icon icon="tag" class="app-search-icon text-muted" />
                 </div>
               </div>
@@ -135,24 +156,41 @@
 
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Organize</h4>
-              <p class="text-muted mb-0">Organize your product by selecting the appropriate brand, category, status, and tags.</p>
+              <h4 class="card-title mb-1">Organisation</h4>
+              <p class="text-muted mb-0">Organisez votre produit en sélectionnant la marque, la catégorie, le statut et
+                les tags appropriés.</p>
             </BCardHeader>
 
             <div class="card-body">
               <div class="mb-3">
-                <label for="brand" class="form-label">Brand</label>
-                <div class="app-search">
-                  <input v-model="form.brandName" type="text" class="form-control" id="brand" placeholder="Enter brand name" />
+                <label for="brand" class="form-label">Marque</label>
+                <div class="app-search position-relative">
+                  <BFormInput
+                    id="brand"
+                    v-model="form.brandName"
+                    placeholder="Rechercher ou saisir une marque"
+                    autocomplete="off"
+                    @focus="showBrandSuggestions = true"
+                    @input="showBrandSuggestions = true"
+                    @blur="hideBrandSuggestions"
+                  />
                   <Icon icon="layers" class="app-search-icon text-muted" />
+                  <div v-if="showBrandSuggestions" class="brand-suggestions shadow-sm">
+                    <button v-for="brand in filteredBrands" :key="brand.id" type="button" class="brand-suggestion" @mousedown.prevent="selectBrand(brand.name)">
+                      {{ brand.name }}
+                    </button>
+                    <p v-if="!filteredBrands.length" class="mb-0 px-3 py-2 text-muted fs-sm">Aucune marque trouvée. Vous pouvez conserver votre saisie.</p>
+                  </div>
                 </div>
+                <small v-if="brandsLoading" class="text-muted">Chargement des marques...</small>
+                <small v-else-if="brandsError" class="text-danger">{{ brandsError }}</small>
               </div>
 
               <div class="mb-3">
-                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                <label for="category" class="form-label">Categorie <span class="text-danger">*</span></label>
                 <div class="app-search">
                   <BFormSelect v-model="category" class="form-control my-1 my-md-0" id="category">
-                    <option value="All">Choose Category</option>
+                    <option value="All">Choisir la catégorie</option>
                     <option v-for="item in categories" :key="item.slug" :value="item.name">{{ item.name }}</option>
                   </BFormSelect>
                   <Icon icon="layout-grid" class="app-search-icon text-muted" />
@@ -163,11 +201,11 @@
                 <label for="statusOne" class="form-label">Status <span class="text-danger">*</span></label>
                 <div class="app-search">
                   <BFormSelect v-model="status" class="form-control my-1 my-md-0" id="statusOne">
-                    <option value="All">Choose Status</option>
-                    <option value="Published">Published</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Schedule">Schedule</option>
-                    <option value="Draft">Draft</option>
+                    <option value="All">Choisir le statut</option>
+                    <option value="Published">Publié</option>
+                    <option value="Inactive">Inactif</option>
+                    <option value="Schedule">Programmé</option>
+                    <option value="Draft">Brouillon</option>
                   </BFormSelect>
                   <Icon icon="wand-sparkles" class="app-search-icon text-muted" />
                 </div>
@@ -201,6 +239,7 @@ import { useRouter } from 'vue-router'
 import FileUploader from '~/components/FileUploader.vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import Icon from '~/components/wrappers/Icon.vue'
+import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
 import { createProduct } from '~/services/products.service'
 import { useAuth } from '~/composables/useAuth'
@@ -209,9 +248,26 @@ const category = ref('All')
 const status = ref('All')
 const discountType = ref('All')
 const categories = ref<{ name: string; slug: string }[]>([])
+const brands = ref<{ id: string; name: string }[]>([])
+const brandsLoading = ref(false)
+const brandsError = ref<string | null>(null)
+const showBrandSuggestions = ref(false)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
+
+const colorOptions = [
+  { label: 'Noir', value: 'black' },
+  { label: 'Blanc', value: 'white' },
+  { label: 'Gris', value: 'gray' },
+  { label: 'Rouge', value: 'red' },
+  { label: 'Bleu', value: 'blue' },
+  { label: 'Vert', value: 'green' },
+  { label: 'Jaune', value: 'yellow' },
+  { label: 'Orange', value: 'orange' },
+  { label: 'Marron', value: 'brown' },
+  { label: 'Rose', value: 'pink' },
+]
 
 const { user } = useAuth()
 const router = useRouter()
@@ -228,12 +284,17 @@ const form = ref({
   brandName: '',
   images: [] as File[],
   reference: '',
+  color: '',
   condition: '',
   size: '',
   productUrl: '',
 })
 
 const selectedCategory = computed(() => (category.value === 'All' ? '' : category.value))
+const filteredBrands = computed(() => {
+  const search = form.value.brandName.trim().toLocaleLowerCase('fr-FR')
+  return brands.value.filter((brand) => brand.name.toLocaleLowerCase('fr-FR').includes(search))
+})
 
 const generatedSku = computed(() => {
   const prefix = form.value.title
@@ -263,6 +324,7 @@ const resetForm = () => {
     brandName: '',
     images: [],
     reference: '',
+    color: '',
     condition: '',
     size: '',
     productUrl: '',
@@ -279,6 +341,30 @@ const loadCategories = async () => {
     name: item.categoryName || item.name || item.slug,
     slug: item.slug,
   }))
+}
+
+const loadBrands = async () => {
+  try {
+    brandsLoading.value = true
+    brandsError.value = null
+    brands.value = (await getBrands()).map(({ id, name }) => ({ id, name }))
+  } catch (err) {
+    console.error('[product-add] Failed to load brands', err)
+    brandsError.value = 'Impossible de charger les marques.'
+  } finally {
+    brandsLoading.value = false
+  }
+}
+
+const selectBrand = (name: string) => {
+  form.value.brandName = name
+  showBrandSuggestions.value = false
+}
+
+const hideBrandSuggestions = () => {
+  window.setTimeout(() => {
+    showBrandSuggestions.value = false
+  }, 150)
 }
 
 const handleCreateProduct = async (published: boolean) => {
@@ -305,6 +391,7 @@ const handleCreateProduct = async (published: boolean) => {
       price: Number(form.value.price),
       published,
       reference: form.value.reference.trim() || undefined,
+      color: form.value.color.trim() || undefined,
       condition: form.value.condition.trim() || undefined,
       size: form.value.size.trim() || undefined,
       productUrl: form.value.productUrl.trim() || undefined,
@@ -326,5 +413,38 @@ const handleCreateProduct = async (published: boolean) => {
   }
 }
 
-onMounted(loadCategories)
+onMounted(() => {
+  loadCategories()
+  loadBrands()
+})
 </script>
+
+<style scoped>
+.brand-suggestions {
+  background-color: #fff !important;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  color: #212529;
+  left: 0;
+  margin-top: 0.25rem;
+  max-height: 13.75rem;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1050;
+}
+
+.brand-suggestion {
+  background: transparent;
+  border: 0;
+  display: block;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.brand-suggestion:hover {
+  background: var(--bs-tertiary-bg);
+}
+</style>

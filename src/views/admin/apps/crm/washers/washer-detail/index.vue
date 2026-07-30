@@ -598,7 +598,7 @@
           </div>
         </div>
 
-        <!-- RIB -->
+        <!-- RIB --> 
         <div class="col-12 border-bottom pb-4 mb-1">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>

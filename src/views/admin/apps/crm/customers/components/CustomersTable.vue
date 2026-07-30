@@ -92,7 +92,7 @@
       <template #cell(city)="{ item }">
         <span class="badge p-1 text-bg-light fs-sm">
           <Icon icon="map-pin" class="me-1 fs-xs" />
-          {{ item.city || '-' }}
+          {{ item.city || item.clientAddress?.city || '-' }}
         </span>
       </template>
 
@@ -116,7 +116,7 @@
       </template>
 
       <template #cell(lastLogin)="{ item }">
-        <span class="text-muted fs-xs">{{ formatDate(item.lastLogin) }}</span>
+        <span class="text-muted fs-xs">{{ formatDate(item.lastLoginAt || item.lastLogin) }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
@@ -186,7 +186,9 @@ const fields = [
 ]
 
 const uniqueCities = computed(() => {
-  const cities = clientsList.value.map((c) => c.city).filter(Boolean) as string[]
+  const cities = clientsList.value
+    .map((c) => c.city || c.clientAddress?.city)
+    .filter(Boolean) as string[]
   return [...new Set(cities)].sort()
 })
 
@@ -194,7 +196,7 @@ const filteredClients = computed(() => {
   return clientsList.value.filter((item) => {
     const matchSearch =
       !searchQuery.value ||
-      (item.name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (item.fullName || item.name || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       (item.email || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       (item.phoneNumber || '').includes(searchQuery.value)
 

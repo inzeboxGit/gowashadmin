@@ -31,6 +31,14 @@
             </div>
 
             <div class="app-search">
+              <BFormSelect v-model="brand" class="form-control my-1 my-md-0">
+                <option value="All">Marque</option>
+                <option v-for="item in brands" :key="item" :value="item">{{ item }}</option>
+              </BFormSelect>
+              <Icon icon="award" class="app-search-icon text-muted" />
+            </div>
+
+            <div class="app-search">
 
               <BFormSelect v-model="status" class="form-control my-1 my-md-0">
                 <option value="Tout">Tous</option>
@@ -172,6 +180,8 @@ import Rating from '~/components/Rating.vue'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
+import { getBrands } from '~/services/brands.service'
+import { getCategories } from '~/services/categories.service'
 import { bulkImportProducts, getProducts } from '~/services/products.service'
 import { productsSeed } from '~/data/products-seed'
 import { toPascalCase } from '~/utils/helpers'
@@ -196,6 +206,7 @@ type ProductTableItem = {
 }
 
 const category = ref('All')
+const brand = ref('All')
 const status = ref('All')
 const priceRange = ref('All')
 
@@ -221,6 +232,8 @@ const currentPage = ref(1)
 const perPage = ref(8)
 const totalRows = ref(0)
 const products = ref<ProductTableItem[]>([])
+const categories = ref<string[]>([])
+const brands = ref<string[]>([])
 const loading = ref(false)
 const importing = ref(false)
 const error = ref<string | null>(null)
@@ -228,9 +241,39 @@ const successMessage = ref<string | null>(null)
 const route = useRoute()
 const router = useRouter()
 
-const categories = computed(() => {
+const productCategories = computed(() => {
   return [...new Set(products.value.map((product) => product.category).filter(Boolean))].sort()
 })
+
+const productBrands = computed(() => {
+  return [...new Set(products.value.map((product) => product.brand).filter(Boolean))].sort()
+})
+
+const loadCategories = async () => {
+  try {
+    const firestoreCategories = await getCategories()
+    categories.value = firestoreCategories
+      .map((categoryItem) => categoryItem.categoryName || categoryItem.name || categoryItem.slug || categoryItem.id)
+      .filter((categoryName): categoryName is string => Boolean(categoryName))
+      .sort((a, b) => a.localeCompare(b, 'fr'))
+  } catch (err) {
+    console.error('[products] Failed to load categories', err)
+    categories.value = []
+  }
+}
+
+const loadBrands = async () => {
+  try {
+    const firestoreBrands = await getBrands()
+    brands.value = firestoreBrands
+      .map((brandItem) => brandItem.name || brandItem.slug || brandItem.id)
+      .filter((brandName): brandName is string => Boolean(brandName))
+      .sort((a, b) => a.localeCompare(b, 'fr'))
+  } catch (err) {
+    console.error('[products] Failed to load brands', err)
+    brands.value = []
+  }
+}
 
 const filteredProducts = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase()
@@ -244,6 +287,7 @@ const filteredProducts = computed(() => {
       product.id.toLowerCase().includes(normalizedSearch)
 
     const matchesCategory = category.value === 'All' || product.category === category.value
+    const matchesBrand = brand.value === 'All' || product.brand === brand.value
     const matchesStatus = status.value === 'All' || toPascalCase(product.status) === status.value
     const matchesPriceRange =
       priceRange.value === 'All' ||
@@ -252,7 +296,7 @@ const filteredProducts = computed(() => {
       (priceRange.value === '151-500' && product.numericPrice >= 151 && product.numericPrice <= 500) ||
       (priceRange.value === '500+' && product.numericPrice > 500)
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesPriceRange
+    return matchesSearch && matchesCategory && matchesBrand && matchesStatus && matchesPriceRange
   })
 })
 
@@ -315,7 +359,16 @@ const loadProducts = async () => {
   try {
     loading.value = true
     error.value = null
-    products.value = (await getProducts()).map(mapProductToTableItem)
+    const productItems = await getProducts()
+    products.value = productItems.map(mapProductToTableItem)
+    await loadCategories()
+    await loadBrands()
+    if (!categories.value.length) {
+      categories.value = productCategories.value
+    }
+    if (!brands.value.length) {
+      brands.value = productBrands.value
+    }
     totalRows.value = filteredProducts.value.length
   } catch (err) {
     console.error('[products] Failed to load products', err)

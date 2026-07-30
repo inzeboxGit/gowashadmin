@@ -1,6 +1,7 @@
 export type Product = {
   brandName: string
   category: string
+  color?: string
   condition?: string
   createdAt: string
   description: string
@@ -22,6 +23,7 @@ export type Product = {
 export type CreateProductInput = {
   brandName: string
   category: string
+  color?: string
   condition?: string
   description: string
   discount: number
@@ -41,6 +43,7 @@ export type CreateProductInput = {
 export type UpdateProductInput = {
   brandName: string
   category: string
+  color?: string
   condition?: string
   description: string
   discount: number

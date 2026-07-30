@@ -8,7 +8,7 @@
         <BCardHeader class="border-light justify-content-between">
           <div class="d-flex gap-2">
             <div class="app-search">
-              <BFormInput type="search" placeholder="Search brand..." v-model="searchQuery" />
+              <BFormInput type="search" placeholder="Rechercher une marque..." v-model="searchQuery" />
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
@@ -22,15 +22,15 @@
 
             <div class="app-search">
               <BFormSelect v-model="status" class="form-control my-1 my-md-0">
-                <option value="All">All</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="All">Tous</option>
+                <option value="Active">Actif</option>
+                <option value="Inactive">Inactif</option>
               </BFormSelect>
               <Icon icon="circle-small" class="app-search-icon text-muted" />
             </div>
 
             <BButton variant="primary" class="ms-1" v-b-modal.addBrandModal>
-              <Icon icon="plus" class="fs-sm me-2" /> Add Brand
+              <Icon icon="plus" class="fs-sm me-2" /> Ajouter une marque
             </BButton>
           </div>
         </BCardHeader>
@@ -210,8 +210,8 @@ const brandForm = ref({
   currentLogo: '',
 })
 
-const modalTitle = computed(() => (editingBrandId.value ? 'Edit Brand' : 'Add New Brand'))
-const modalOkTitle = computed(() => (editingBrandId.value ? 'Update Brand' : 'Add Brand'))
+const modalTitle = computed(() => (editingBrandId.value ? 'Modifier la marque' : 'Ajouter une marque'))
+const modalOkTitle = computed(() => (editingBrandId.value ? 'Mettre à jour la marque' : 'Ajouter une marque'))
 
 const filteredBrands = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase()

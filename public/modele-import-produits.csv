@@ -1,0 +1,2 @@
+title,brandName,category,color,reference,stock,condition,size,description,price,oldPrice,discount,productUrl,imageUrl,published,laveurId
+"Shampoing carrosserie 1L","autoclean_pro","Produits de lavage","black","ACP-SH-001",50,"Neuf","1L","Shampoing concentré pour carrosserie.",19.99,24.99,20,"https://example.com/shampoing-carrosserie","https://example.com/images/shampoing.jpg",true,"VOTRE_UID_LAVEUR"

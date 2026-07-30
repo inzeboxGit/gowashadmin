@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <PageBreadcrumb title="Products Grid" subtitle="Ecommerce" />
+  <PageBreadcrumb title="Produits en grille" subtitle="Ecommerce" />
 
   <BRow class="mb-2">
     <BCol lg="12">
@@ -11,7 +11,7 @@
               <Icon icon="menu" class="fs-lg" />
             </button>
           </div>
-          <h3 class="mb-0 fs-xl flex-grow-1">{{ totalRows }} Products</h3>
+          <h3 class="mb-0 fs-xl flex-grow-1">{{ totalRows }} Produits</h3>
 
           <div class="d-flex gap-1">
             <RouterLink to="/apps/ecommerce/products-grid" class="btn btn-primary btn-icon">
@@ -20,7 +20,9 @@
             <RouterLink to="/apps/ecommerce/products" class="btn btn-soft-primary btn-icon">
               <Icon icon="list-check" class="fs-lg" />
             </RouterLink>
-            <RouterLink to="/apps/ecommerce/product-add" class="btn btn-danger ms-1"> <Icon icon="plus" class="fs-sm me-2" /> Add Product </RouterLink>
+            <RouterLink to="/apps/ecommerce/product-add" class="btn btn-danger ms-1">
+              <Icon icon="plus" class="fs-sm me-2" /> Ajouter un produit
+            </RouterLink>
           </div>
         </div>
       </form>
@@ -47,7 +49,9 @@
       </BRow>
 
       <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-        <span class="text-muted fst-italic">Last modification: <Icon icon="clock" /> {{ lastModification }} </span>
+        <span class="text-muted fst-italic">Dernière modification:
+          <Icon icon="clock" /> {{ lastModification }}
+        </span>
         <BPagination v-model="currentPage" first-number last-number hide-ellipsis :total-rows="totalRows" :per-page="perPage" class="pagination-boxed">
           <template #prev-text>
             <Icon icon="chevron-left" />

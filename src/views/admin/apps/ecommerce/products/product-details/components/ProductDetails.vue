@@ -46,6 +46,10 @@
       <h6 class="mb-1 text-muted text-uppercase">État :</h6>
       <p class="fw-medium mb-0">{{ product.condition }}</p>
     </BCol>
+    <BCol v-if="product.color" md="4" xl="3">
+      <h6 class="mb-1 text-muted text-uppercase">Couleur :</h6>
+      <p class="fw-medium mb-0">{{ product.color }}</p>
+    </BCol>
     <BCol v-if="product.size" md="4" xl="3">
       <h6 class="mb-1 text-muted text-uppercase">Taille :</h6>
       <p class="fw-medium mb-0">{{ product.size }}</p>

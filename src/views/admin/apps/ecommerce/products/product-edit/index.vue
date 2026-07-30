@@ -47,6 +47,16 @@
 
                 <BCol lg="6">
                   <div class="mb-3">
+                    <label for="color" class="form-label"> Couleur </label>
+                    <BFormInput id="color" v-model="form.color" list="product-color-options" type="text" placeholder="Ex: Bleu marine" autocomplete="off" />
+                    <datalist id="product-color-options">
+                      <option v-for="color in colorOptions" :key="color.value" :value="color.value" :label="color.label" />
+                    </datalist>
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
                     <label for="size" class="form-label"> Taille / Contenance </label>
                     <BFormInput id="size" v-model="form.size" type="text" placeholder="Ex: 1L, 5kg" />
                   </div>
@@ -127,10 +137,26 @@
             <div class="card-body">
               <div class="mb-3">
                 <label for="brand" class="form-label">Marque</label>
-                <div class="app-search">
-                  <input v-model="form.brandName" type="text" class="form-control" id="brand" placeholder="Nom de la marque" />
+                <div class="app-search position-relative">
+                  <BFormInput
+                    id="brand"
+                    v-model="form.brandName"
+                    placeholder="Rechercher ou saisir une marque"
+                    autocomplete="off"
+                    @focus="showBrandSuggestions = true"
+                    @input="showBrandSuggestions = true"
+                    @blur="hideBrandSuggestions"
+                  />
                   <Icon icon="layers" class="app-search-icon text-muted" />
+                  <div v-if="showBrandSuggestions" class="brand-suggestions shadow-sm">
+                    <button v-for="brand in filteredBrands" :key="brand.id" type="button" class="brand-suggestion" @mousedown.prevent="selectBrand(brand.name)">
+                      {{ brand.name }}
+                    </button>
+                    <p v-if="!filteredBrands.length" class="mb-0 px-3 py-2 text-muted fs-sm">Aucune marque trouvée. Vous pouvez conserver votre saisie.</p>
+                  </div>
                 </div>
+                <small v-if="brandsLoading" class="text-muted">Chargement des marques...</small>
+                <small v-else-if="brandsError" class="text-danger">{{ brandsError }}</small>
               </div>
 
               <div class="mb-3">
@@ -169,11 +195,12 @@
 
 <script setup lang="ts">
 import { BAlert, BButton, BCard, BCardBody, BCardHeader, BCol, BFormInput, BFormSelect, BRow, BSpinner } from 'bootstrap-vue-next'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FileUploader from '~/components/FileUploader.vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import Icon from '~/components/wrappers/Icon.vue'
+import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
 import { getProductById, updateProduct } from '~/services/products.service'
 
@@ -181,7 +208,11 @@ const route = useRoute()
 const router = useRouter()
 
 const categories = ref<{ name: string; slug: string }[]>([])
+const brands = ref<{ id: string; name: string }[]>([])
 const category = ref('')
+const brandsLoading = ref(false)
+const brandsError = ref<string | null>(null)
+const showBrandSuggestions = ref(false)
 const loading = ref(false)
 const loadingProduct = ref(true)
 const fetchError = ref<string | null>(null)
@@ -189,10 +220,24 @@ const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 const currentImageUrl = ref('')
 
+const colorOptions = [
+  { label: 'Noir', value: 'black' },
+  { label: 'Blanc', value: 'white' },
+  { label: 'Gris', value: 'gray' },
+  { label: 'Rouge', value: 'red' },
+  { label: 'Bleu', value: 'blue' },
+  { label: 'Vert', value: 'green' },
+  { label: 'Jaune', value: 'yellow' },
+  { label: 'Orange', value: 'orange' },
+  { label: 'Marron', value: 'brown' },
+  { label: 'Rose', value: 'pink' },
+]
+
 const form = ref({
   title: '',
   reference: '',
   stock: 0,
+  color: '',
   condition: '',
   size: '',
   productUrl: '',
@@ -205,6 +250,11 @@ const form = ref({
   published: false,
 })
 
+const filteredBrands = computed(() => {
+  const search = form.value.brandName.trim().toLocaleLowerCase('fr-FR')
+  return brands.value.filter((brand) => brand.name.toLocaleLowerCase('fr-FR').includes(search))
+})
+
 const goBack = () => router.push(`/apps/ecommerce/product-details/${route.params.id}`)
 
 const loadCategories = async () => {
@@ -212,6 +262,30 @@ const loadCategories = async () => {
     name: item.categoryName || item.name || item.slug,
     slug: item.slug,
   }))
+}
+
+const loadBrands = async () => {
+  try {
+    brandsLoading.value = true
+    brandsError.value = null
+    brands.value = (await getBrands()).map(({ id, name }) => ({ id, name }))
+  } catch (err) {
+    console.error('[product-edit] Failed to load brands', err)
+    brandsError.value = 'Impossible de charger les marques.'
+  } finally {
+    brandsLoading.value = false
+  }
+}
+
+const selectBrand = (name: string) => {
+  form.value.brandName = name
+  showBrandSuggestions.value = false
+}
+
+const hideBrandSuggestions = () => {
+  window.setTimeout(() => {
+    showBrandSuggestions.value = false
+  }, 150)
 }
 
 const handleUpdate = async () => {
@@ -229,6 +303,7 @@ const handleUpdate = async () => {
       title: form.value.title.trim(),
       brandName: (form.value.brandName || '').trim(),
       category: category.value,
+      color: (form.value.color || '').trim() || undefined,
       condition: (form.value.condition || '').trim() || undefined,
       description: form.value.description || '',
       discount: Number(form.value.discount || 0),
@@ -253,7 +328,7 @@ const handleUpdate = async () => {
 }
 
 onMounted(async () => {
-  await loadCategories()
+  await Promise.all([loadCategories(), loadBrands()])
   try {
     const product = await getProductById(route.params.id as string)
     if (!product) { fetchError.value = 'Produit introuvable.'; return }
@@ -264,6 +339,7 @@ onMounted(async () => {
       title: product.title || '',
       reference: product.reference || '',
       stock: product.stock ?? 0,
+      color: product.color || '',
       condition: product.condition || '',
       size: product.size || '',
       productUrl: product.productUrl || '',
@@ -283,4 +359,32 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.brand-suggestions {
+  background-color: #fff !important;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  color: #212529;
+  left: 0;
+  margin-top: 0.25rem;
+  max-height: 13.75rem;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1050;
+}
+
+.brand-suggestion {
+  background: transparent;
+  border: 0;
+  display: block;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+
+.brand-suggestion:hover {
+  background: var(--bs-tertiary-bg);
+}
+</style>
