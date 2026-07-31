@@ -125,6 +125,12 @@ export const allRoutes = [
             component: () => import('~/views/admin/apps/ecommerce/brands/index.vue')
         },
         {
+            path: '/apps/ecommerce/tax-rates',
+            name: 'apps.ecommerce.tax-rates',
+            meta: { title: 'Gestion de TVA' },
+            component: () => import('~/views/admin/apps/ecommerce/tax-rates/index.vue')
+        },
+        {
             path: '/apps/ecommerce/customers',
             name: 'apps.ecommerce.customers',
             meta: { title: 'Clients' },

@@ -123,7 +123,7 @@
 
       <BCol md="6">
         <BFormGroup label="Slug" label-for="brandSlug" label-class="form-label">
-          <BFormInput id="brandSlug" v-model="brandForm.slug" class="form-control" placeholder="e.g. toyota" required />
+          <BFormInput id="brandSlug" v-model="brandForm.slug" class="form-control bg-light" placeholder="Généré automatiquement" readonly required />
         </BFormGroup>
       </BCol>
 
@@ -297,8 +297,8 @@ const slugify = (value: string) => {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
 }
 
 const openEditBrandModal = (item: BrandTableItem) => {
@@ -383,6 +383,10 @@ const { selected, toggleSelectAll, onToggleRow, deleteSelected, deleteItem, allS
 watch([filteredBrands, perPage], () => {
   totalRows.value = filteredBrands.value.length
   currentPage.value = 1
+})
+
+watch(() => brandForm.value.name, (name) => {
+  brandForm.value.slug = slugify(name)
 })
 
 onMounted(loadBrands)

@@ -115,10 +115,13 @@ const mapProductToCard = (product: Product): ProductType => ({
   id: product.id,
   name: product.title,
   image: product.imageUrl || '/images/products/1.png',
+  basePrice: product.basePrice ?? product.price,
   price: product.price,
+  priceExcludingTax: product.priceExcludingTax ?? product.price,
   discount: product.discount || undefined,
   rating: 0,
   reviews: 0,
+  tvaRate: product.tvaRate ?? product.taxRate ?? 0,
   updatedAt: product.updatedAt,
 })
 

@@ -75,11 +75,12 @@
             <RouterLink to="/apps/ecommerce/product-add" class="btn btn-danger ms-1">
               <Icon icon="plus" class="fs-sm me-2" /> Ajouter Produit
             </RouterLink>
-            <!-- <BButton variant="warning" class="ms-1" :disabled="importing" @click="handleImportSeed">
+            <input ref="csvInput" class="d-none" type="file" accept=".csv,text/csv" @change="handleImportCsv" />
+            <BButton variant="warning" class="ms-1" :disabled="importing" @click="csvInput?.click()">
               <BSpinner v-if="importing" small class="me-2" />
               <Icon v-else icon="upload" class="fs-sm me-2" />
-              Import catalogue
-            </BButton> -->
+              Importer CSV
+            </BButton>
           </div>
         </BCardHeader>
 
@@ -129,6 +130,15 @@
           </template>
 
           <template #cell(price)="data"> {{ data.item.price }} </template>
+
+          <template #cell(priceExcludingTax)="data"> {{ data.item.priceExcludingTax }} </template>
+
+          <template #cell(tvaRate)="data">
+            <span v-if="data.item.tvaRate > 0" class="badge badge-soft-info fs-xxs">{{ data.item.tvaRate }} %</span>
+            <span v-else class="text-muted">-</span>
+          </template>
+
+          <template #cell(basePrice)="data"> {{ data.item.basePrice }} </template>
 
           <template #cell(rating)="data">
             <Rating :rating="data.item.rating" class="d-inline-flex justify-content-start gap-1" />
@@ -183,7 +193,6 @@ import { useTableActions } from '~/composables/useTableActions'
 import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
 import { bulkImportProducts, getProducts } from '~/services/products.service'
-import { productsSeed } from '~/data/products-seed'
 import { toPascalCase } from '~/utils/helpers'
 import type { Product } from '~/types/product'
 
@@ -196,11 +205,14 @@ type ProductTableItem = {
   category: string
   stock: number
   price: string
+  priceExcludingTax: string
+  basePrice: string
   numericPrice: number
   orders: number
   rating: number
   reviews: number
   status: 'published' | 'pending' | 'out-of-stock'
+  tvaRate: number
   date: string
   time: string
 }
@@ -213,10 +225,14 @@ const priceRange = ref('All')
 const fields = [
   { key: 'id', label: 'Id' },
   { key: 'name', label: 'Produit', sortable: true },
+  { key: 'brand', label: 'Marque', sortable: true },
   { key: 'sku', label: 'SKU' },
   { key: 'category', label: 'Catégorie' },
   { key: 'stock', label: 'Stock', sortable: true },
-  { key: 'price', label: 'Prix', sortable: true },
+  { key: 'priceExcludingTax', label: 'Prix HT', sortable: true },
+  { key: 'price', label: 'Prix TTC', sortable: true },
+  { key: 'tvaRate', label: 'Taux TVA', sortable: true },
+  { key: 'basePrice', label: 'Prix TTC', sortable: true },
   { key: 'orders', label: 'Commandes', sortable: true },
   { key: 'rating', label: 'Évaluation', sortable: true },
   { key: 'status', label: 'Statut', sortable: true },
@@ -236,6 +252,7 @@ const categories = ref<string[]>([])
 const brands = ref<string[]>([])
 const loading = ref(false)
 const importing = ref(false)
+const csvInput = ref<HTMLInputElement | null>(null)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 const route = useRoute()
@@ -248,6 +265,8 @@ const productCategories = computed(() => {
 const productBrands = computed(() => {
   return [...new Set(products.value.map((product) => product.brand).filter(Boolean))].sort()
 })
+
+const normalizeBrandForFilter = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '_')
 
 const loadCategories = async () => {
   try {
@@ -287,7 +306,7 @@ const filteredProducts = computed(() => {
       product.id.toLowerCase().includes(normalizedSearch)
 
     const matchesCategory = category.value === 'All' || product.category === category.value
-    const matchesBrand = brand.value === 'All' || product.brand === brand.value
+    const matchesBrand = brand.value === 'All' || normalizeBrandForFilter(product.brand) === normalizeBrandForFilter(brand.value)
     const matchesStatus = status.value === 'All' || toPascalCase(product.status) === status.value
     const matchesPriceRange =
       priceRange.value === 'All' ||
@@ -328,30 +347,114 @@ const mapProductToTableItem = (product: Product): ProductTableItem => {
     category: product.category,
     stock: product.stock ?? 0,
     price: `${product.price}`,
+    priceExcludingTax: `${product.priceExcludingTax ?? product.price}`,
+    basePrice: `${product.basePrice ?? product.price}`,
     numericPrice: product.price,
     orders: 0,
     rating: 0,
     reviews: 0,
     status: product.published ? 'published' : 'pending',
+    tvaRate: product.tvaRate ?? product.taxRate ?? 0,
     date: publishedDate.date,
     time: publishedDate.time,
   }
 }
 
-const handleImportSeed = async () => {
-  if (!confirm(`Importer ${productsSeed.length} produits dans la collection ? Cette action ne peut pas être annulée.`)) return
+const csvColumns = ['title', 'brandName', 'category', 'color', 'reference', 'stock', 'condition', 'size', 'description', 'price', 'oldPrice', 'discount', 'productUrl', 'imageUrl', 'published', 'laveurId']
+
+const parseCsv = (content: string) => {
+  const firstLine = content.split(/\r?\n/, 1)[0] || ''
+  const delimiter = firstLine.includes('\t') ? '\t' : firstLine.split(';').length > firstLine.split(',').length ? ';' : ','
+  const rows: string[][] = []
+  let row: string[] = []
+  let value = ''
+  let quoted = false
+
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index]
+    if (character === '"') {
+      if (quoted && content[index + 1] === '"') { value += '"'; index += 1 } else quoted = !quoted
+    } else if (character === delimiter && !quoted) {
+      row.push(value.trim()); value = ''
+    } else if ((character === '\n' || character === '\r') && !quoted) {
+      if (character === '\r' && content[index + 1] === '\n') index += 1
+      row.push(value.trim())
+      if (row.some(Boolean)) rows.push(row)
+      row = []; value = ''
+    } else value += character
+  }
+  row.push(value.trim())
+  if (row.some(Boolean)) rows.push(row)
+  return rows
+}
+
+const parseNumber = (value: string, fallback = 0) => {
+  const number = Number(value.replace(',', '.'))
+  return Number.isFinite(number) ? number : fallback
+}
+
+const parseOptionalNumber = (value: string) => value.trim() === '' ? null : parseNumber(value)
+
+const parsePublished = (value: string) => {
+  const normalizedValue = value.trim().toLowerCase()
+  return normalizedValue === '' ? null : ['true', '1', 'oui', 'yes'].includes(normalizedValue)
+}
+
+const handleImportCsv = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
 
   try {
     importing.value = true
     error.value = null
-    await bulkImportProducts(productsSeed)
-    successMessage.value = `${productsSeed.length} produits importés avec succès.`
+    successMessage.value = null
+    const rows = parseCsv(await file.text())
+    if (rows.length < 2) throw new Error('Le fichier CSV ne contient aucune ligne de produit.')
+
+    const headers = rows[0].map((header) => header.replace(/^\uFEFF/, '').trim())
+    const missingColumns = csvColumns.filter((column) => !headers.includes(column))
+    if (missingColumns.length) throw new Error(`Colonnes manquantes : ${missingColumns.join(', ')}.`)
+
+    const headerIndex = Object.fromEntries(headers.map((header, index) => [header, index])) as Record<string, number>
+    const productsToImport = rows.slice(1).map((row, index) => {
+      const value = (column: string) => row[headerIndex[column]] || ''
+      const title = value('title').trim()
+      const category = value('category').trim()
+      const price = parseNumber(value('price'), Number.NaN)
+      if (!title || !Number.isFinite(price)) throw new Error(`Ligne ${index + 2} : title et price sont obligatoires.`)
+
+      return {
+        title,
+        brandName: value('brandName').trim(),
+        category,
+        color: value('color').trim(),
+        reference: value('reference').trim(),
+        stock: parseOptionalNumber(value('stock')),
+        condition: value('condition').trim(),
+        size: value('size').trim(),
+        description: value('description'),
+        price,
+        priceExcludingTax: price,
+        basePrice: price,
+        oldPrice: parseOptionalNumber(value('oldPrice')),
+        discount: parseOptionalNumber(value('discount')),
+        productUrl: value('productUrl').trim(),
+        imageUrl: value('imageUrl').trim(),
+        published: parsePublished(value('published')),
+        laveurId: value('laveurId').trim(),
+      }
+    })
+
+    await bulkImportProducts(productsToImport)
+    successMessage.value = `${productsToImport.length} produits importés avec succès.`
     await loadProducts()
   } catch (err) {
-    console.error('[products] Import failed', err)
-    error.value = err instanceof Error ? err.message : "Erreur lors de l'import."
+    console.error('[products] CSV import failed', err)
+    error.value = err instanceof Error ? err.message : "Erreur lors de l'import du fichier CSV."
   } finally {
     importing.value = false
+    input.value = ''
   }
 }
 

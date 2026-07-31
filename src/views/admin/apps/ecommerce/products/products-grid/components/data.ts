@@ -13,9 +13,12 @@ export type ProductType = {
   id: string
   name: string
   image: string
+  basePrice?: number
   price: number
+  priceExcludingTax?: number
   discount?: number
   rating: number
+  tvaRate?: number
   reviews: number
   updatedAt?: string
 }

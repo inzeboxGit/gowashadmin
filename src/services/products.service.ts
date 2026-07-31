@@ -61,6 +61,7 @@ export const createProduct = async (input: CreateProductInput) => {
 
   const payload: Product = {
     brandName: normalizeBrandName(input.brandName),
+    ...(input.basePrice !== undefined && { basePrice: input.basePrice }),
     category: input.category,
     ...(input.color !== undefined && { color: input.color }),
     ...(input.condition !== undefined && { condition: input.condition }),
@@ -72,12 +73,18 @@ export const createProduct = async (input: CreateProductInput) => {
     laveurId: input.laveurId,
     oldPrice: input.oldPrice,
     price: input.price,
+    ...(input.priceExcludingTax !== undefined && { priceExcludingTax: input.priceExcludingTax }),
     ...(input.productUrl !== undefined && { productUrl: input.productUrl }),
     published: input.published,
     ...(input.reference !== undefined && { reference: input.reference }),
     ...(input.size !== undefined && { size: input.size }),
     stock: input.stock,
+    ...(input.taxAmount !== undefined && { taxAmount: input.taxAmount }),
+    ...(input.taxRate !== undefined && { taxRate: input.taxRate }),
+    ...(input.taxRateId !== undefined && { taxRateId: input.taxRateId }),
+    ...(input.taxRateName !== undefined && { taxRateName: input.taxRateName }),
     title: input.title,
+    ...(input.tvaRate !== undefined && { tvaRate: input.tvaRate }),
     updatedAt: now,
   }
 
@@ -93,6 +100,7 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
 
   const fields: Partial<Product> & { updatedAt: string } = {
     brandName: normalizeBrandName(input.brandName),
+    ...(input.basePrice !== undefined && { basePrice: input.basePrice }),
     category: input.category,
     ...(input.color !== undefined && { color: input.color }),
     ...(input.condition !== undefined && { condition: input.condition }),
@@ -101,12 +109,18 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
     imageUrl,
     oldPrice: input.oldPrice,
     price: input.price,
+    ...(input.priceExcludingTax !== undefined && { priceExcludingTax: input.priceExcludingTax }),
     ...(input.productUrl !== undefined && { productUrl: input.productUrl }),
     published: input.published,
     ...(input.reference !== undefined && { reference: input.reference }),
     ...(input.size !== undefined && { size: input.size }),
     stock: input.stock,
+    ...(input.taxAmount !== undefined && { taxAmount: input.taxAmount }),
+    ...(input.taxRate !== undefined && { taxRate: input.taxRate }),
+    ...(input.taxRateId !== undefined && { taxRateId: input.taxRateId }),
+    ...(input.taxRateName !== undefined && { taxRateName: input.taxRateName }),
     title: input.title,
+    ...(input.tvaRate !== undefined && { tvaRate: input.tvaRate }),
     updatedAt: now,
   }
 

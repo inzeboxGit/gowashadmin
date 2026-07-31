@@ -82,6 +82,12 @@ export const menuItems: MenuItemType[] = [
             'slug': 'pages:apps-ecommerce-brands',
             'label': 'Marques',
           },
+          {
+            'url': '/apps/ecommerce/tax-rates',
+            'icon': 'receipt-text',
+            'slug': 'pages:apps-ecommerce-tax-rates',
+            'label': 'Gestion de TVA',
+          },
 
           // {
           //   'url': '/apps/ecommerce/customers',

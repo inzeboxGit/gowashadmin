@@ -104,11 +104,31 @@
 
             <BCardBody>
               <div class="mb-3">
-                <label for="basePrice" class="form-label">Prix de base <span class="text-danger">*</span></label>
+                <label for="basePrice" class="form-label">Prix de base (HT) <span class="text-danger">*</span></label>
                 <div class="app-search">
                   <BFormInput id="basePrice" v-model.number="form.price" type="number" placeholder="Ex: 19.99" />
                   <Icon icon="euro" class="app-search-icon text-muted" />
                 </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="taxRate" class="form-label">TVA appliquée</label>
+                <div class="app-search">
+                  <BFormSelect id="taxRate" v-model="selectedTaxRateId" class="form-control my-1 my-md-0" :disabled="taxRatesLoading">
+                    <option value="">Sans TVA</option>
+                    <option v-for="taxRate in availableTaxRates" :key="taxRate.id" :value="taxRate.id">
+                      {{ taxRate.name }} ({{ formatTaxRate(taxRate.rate) }})
+                    </option>
+                  </BFormSelect>
+                  <Icon icon="receipt-text" class="app-search-icon text-muted" />
+                </div>
+                <small v-if="taxRatesLoading" class="text-muted">Chargement des taux de TVA...</small>
+                <small v-else-if="taxRatesError" class="text-danger">{{ taxRatesError }}</small>
+              </div>
+
+              <div class="rounded border bg-light p-3 mb-3">
+                <div class="d-flex justify-content-between text-muted fs-sm"><span>Montant TVA</span><span>{{ formatAmount(taxAmount) }}</span></div>
+                <div class="d-flex justify-content-between fw-semibold mt-1"><span>Prix TTC</span><span>{{ formatAmount(priceTaxIncluded) }}</span></div>
               </div>
 
               <div class="mb-3">
@@ -203,6 +223,8 @@ import Icon from '~/components/wrappers/Icon.vue'
 import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
 import { getProductById, updateProduct } from '~/services/products.service'
+import { getTaxRates } from '~/services/tax-rates.service'
+import type { TaxRate } from '~/types/tax-rate'
 
 const route = useRoute()
 const router = useRouter()
@@ -212,6 +234,10 @@ const brands = ref<{ id: string; name: string }[]>([])
 const category = ref('')
 const brandsLoading = ref(false)
 const brandsError = ref<string | null>(null)
+const taxRates = ref<TaxRate[]>([])
+const taxRatesLoading = ref(false)
+const taxRatesError = ref<string | null>(null)
+const selectedTaxRateId = ref('')
 const showBrandSuggestions = ref(false)
 const loading = ref(false)
 const loadingProduct = ref(true)
@@ -254,6 +280,13 @@ const filteredBrands = computed(() => {
   const search = form.value.brandName.trim().toLocaleLowerCase('fr-FR')
   return brands.value.filter((brand) => brand.name.toLocaleLowerCase('fr-FR').includes(search))
 })
+const selectedTaxRate = computed(() => taxRates.value.find((taxRate) => taxRate.id === selectedTaxRateId.value))
+const availableTaxRates = computed(() => taxRates.value.filter((taxRate) => taxRate.isActive || taxRate.id === selectedTaxRateId.value))
+const taxAmount = computed(() => Number((Number(form.value.price || 0) * Number(selectedTaxRate.value?.rate || 0) / 100).toFixed(2)))
+const priceTaxIncluded = computed(() => Number((Number(form.value.price || 0) + taxAmount.value).toFixed(2)))
+
+const formatTaxRate = (rate: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(rate)} %`
+const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(amount)
 
 const goBack = () => router.push(`/apps/ecommerce/product-details/${route.params.id}`)
 
@@ -274,6 +307,19 @@ const loadBrands = async () => {
     brandsError.value = 'Impossible de charger les marques.'
   } finally {
     brandsLoading.value = false
+  }
+}
+
+const loadTaxRates = async () => {
+  try {
+    taxRatesLoading.value = true
+    taxRatesError.value = null
+    taxRates.value = await getTaxRates()
+  } catch (err) {
+    console.error('[product-edit] Failed to load tax rates', err)
+    taxRatesError.value = 'Impossible de charger les taux de TVA.'
+  } finally {
+    taxRatesLoading.value = false
   }
 }
 
@@ -310,12 +356,19 @@ const handleUpdate = async () => {
       imageFile: form.value.images[0] || null,
       imageUrl: currentImageUrl.value || '',
       oldPrice: Number(form.value.oldPrice || 0),
-      price: Number(form.value.price),
+      price: priceTaxIncluded.value,
+      basePrice: priceTaxIncluded.value,
+      priceExcludingTax: Number(form.value.price),
       productUrl: (form.value.productUrl || '').trim() || undefined,
       published: Boolean(form.value.published),
       reference: (form.value.reference || '').trim() || undefined,
       size: (form.value.size || '').trim() || undefined,
       stock: Number(form.value.stock || 0),
+      taxAmount: taxAmount.value,
+      taxRate: selectedTaxRate.value?.rate || 0,
+      taxRateId: selectedTaxRate.value?.id || undefined,
+      taxRateName: selectedTaxRate.value?.name || undefined,
+      tvaRate: selectedTaxRate.value?.rate || 0,
     })
 
     successMessage.value = 'Produit mis à jour avec succès.'
@@ -328,13 +381,14 @@ const handleUpdate = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([loadCategories(), loadBrands()])
+  await Promise.all([loadCategories(), loadBrands(), loadTaxRates()])
   try {
     const product = await getProductById(route.params.id as string)
     if (!product) { fetchError.value = 'Produit introuvable.'; return }
 
     currentImageUrl.value = product.imageUrl || ''
     category.value = product.category || ''
+    selectedTaxRateId.value = product.taxRateId || taxRates.value.find((taxRate) => taxRate.rate === (product.tvaRate ?? product.taxRate))?.id || ''
     form.value = {
       title: product.title || '',
       reference: product.reference || '',
@@ -345,7 +399,7 @@ onMounted(async () => {
       productUrl: product.productUrl || '',
       description: product.description || '',
       images: [],
-      price: product.price ?? 0,
+      price: product.priceExcludingTax ?? getPriceExcludingTax(product),
       oldPrice: product.oldPrice ?? 0,
       discount: product.discount ?? 0,
       brandName: product.brandName || '',
@@ -357,6 +411,15 @@ onMounted(async () => {
     loadingProduct.value = false
   }
 })
+
+function getPriceExcludingTax(product: { price?: number; basePrice?: number; tvaRate?: number; taxRate?: number }) {
+  const price = product.price ?? 0
+  const rate = product.tvaRate ?? product.taxRate ?? 0
+  // Les produits créés avant ce changement conservaient le prix HT dans `price`.
+  if (product.basePrice !== undefined && product.basePrice !== product.price) return price
+
+  return rate > 0 ? Number((price / (1 + rate / 100)).toFixed(2)) : price
+}
 </script>
 
 <style scoped>
