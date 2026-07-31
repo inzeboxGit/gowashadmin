@@ -215,7 +215,17 @@
             <span class="d-flex align-items-center">
               <Icon icon="image" class="me-2 text-muted" /> Galerie
             </span>
-            <span class="text-muted fs-sm fw-normal">{{ washer.laveurProfile?.galleryUrls?.length || 0 }} photos</span>
+            <span class="d-flex align-items-center gap-3">
+              <span class="text-muted fs-sm fw-normal">{{ washer.laveurProfile?.galleryUrls?.length || 0 }} photos</span>
+              <input ref="galleryInput" type="file" class="d-none" accept="image/*" multiple
+                @change="handleGalleryFiles" />
+              <button type="button" class="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                :disabled="uploadingGallery" @click="galleryInput?.click()">
+                <span v-if="uploadingGallery" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <Icon v-else icon="plus" />
+                {{ uploadingGallery ? 'Ajout…' : 'Ajouter des photos' }}
+              </button>
+            </span>
           </h6>
 
           <div v-if="washer.laveurProfile?.galleryUrls?.length" class="gallery-scroll">
@@ -726,7 +736,8 @@ import Icon from '~/components/wrappers/Icon.vue'
 import {
   getWasherById, getWasherReviews, getWasherAddons, getWasherServices,
   updateWasher, deleteWasher as apiDeleteWasher,
-  deleteWasherAddon, deleteWasherService, updateWasherReview, deleteWasherReview
+  deleteWasherAddon, deleteWasherService, updateWasherReview, deleteWasherReview,
+  uploadWasherGalleryImages
 } from '~/services/washers.service'
 import { getReservationsByWasherId } from '~/services/reservations.service'
 import { useWasherStats } from '~/composables/useWasherStats'
@@ -745,6 +756,8 @@ const services = ref<WasherService[]>([])
 const reservations = ref<Reservation[]>([])
 const lightboxImage = ref<string | null>(null)
 const loadingReservations = ref(false)
+const galleryInput = ref<HTMLInputElement | null>(null)
+const uploadingGallery = ref(false)
 
 // Washer Stats
 const {
@@ -959,6 +972,37 @@ const handleDeleteReview = (review: WasherReview) => {
 }
 
 // Photo Actions
+const handleGalleryFiles = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files || [])
+  input.value = ''
+
+  if (!washer.value || !files.length) return
+
+  const invalidFile = files.find(file => !file.type.startsWith('image/') || file.size > 10 * 1024 * 1024)
+  if (invalidFile) {
+    alert('Choisissez uniquement des images de 10 Mo maximum.')
+    return
+  }
+
+  uploadingGallery.value = true
+  try {
+    const uploadedUrls = await uploadWasherGalleryImages(washer.value.id, files)
+    const profile = washer.value.laveurProfile || {}
+    const galleryUrls = [...(profile.galleryUrls || []), ...uploadedUrls]
+
+    await updateWasher(washer.value.id, {
+      laveurProfile: { ...profile, galleryUrls }
+    })
+    washer.value.laveurProfile = { ...profile, galleryUrls }
+  } catch (error) {
+    console.error('Error uploading gallery images:', error)
+    alert('Erreur lors de l\'ajout des photos.')
+  } finally {
+    uploadingGallery.value = false
+  }
+}
+
 const handleDeletePhoto = (img: string, index: number) => {
   showConfirm({
     title: 'Supprimer la photo',

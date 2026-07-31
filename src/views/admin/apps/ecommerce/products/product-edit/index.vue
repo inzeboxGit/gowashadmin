@@ -81,8 +81,8 @@
 
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Image produit</h4>
-              <p class="text-muted mb-0">Laissez vide pour conserver l'image actuelle.</p>
+              <h4 class="card-title mb-1">Photos du produit</h4>
+              <p class="text-muted mb-0">Laissez l'image de présentation vide pour conserver l'image actuelle.</p>
             </BCardHeader>
 
             <BCardBody>
@@ -90,7 +90,22 @@
                 <img :src="currentImageUrl" alt="Image actuelle" class="img-thumbnail" style="max-height: 150px;" />
                 <p class="text-muted mt-1 mb-0 fs-xs">Image actuelle</p>
               </div>
-              <FileUploader v-model="form.images" />
+              <label class="form-label fw-semibold">Nouvelle image de présentation</label>
+              <FileUploader v-model="form.presentationImages" />
+
+              <div class="border-top mt-4 pt-4">
+                <label class="form-label fw-semibold">Galerie photos</label>
+                <p class="text-muted fs-sm">Les nouvelles images seront ajoutées au tableau <code>galleryUrls</code>.</p>
+                <div v-if="galleryUrls.length" class="d-flex flex-wrap gap-2 mb-3">
+                  <div v-for="(url, index) in galleryUrls" :key="url" class="position-relative">
+                    <img :src="url" alt="Photo de galerie" class="img-thumbnail" style="height: 100px; width: 100px; object-fit: cover;" />
+                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" title="Retirer la photo" @click="removeGalleryImage(index)">
+                      <Icon icon="x" />
+                    </button>
+                  </div>
+                </div>
+                <FileUploader v-model="form.galleryImages" />
+              </div>
             </BCardBody>
           </BCard>
         </BCol>
@@ -184,7 +199,7 @@
                 <div class="app-search">
                   <BFormSelect v-model="category" class="form-control my-1 my-md-0" id="category">
                     <option value="">Choisir une catégorie</option>
-                    <option v-for="item in categories" :key="item.slug" :value="item.name">{{ item.name }}</option>
+                    <option v-for="item in categories" :key="item.slug" :value="item.slug">{{ item.name }}</option>
                   </BFormSelect>
                   <Icon icon="layout-grid" class="app-search-icon text-muted" />
                 </div>
@@ -245,6 +260,7 @@ const fetchError = ref<string | null>(null)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 const currentImageUrl = ref('')
+const galleryUrls = ref<string[]>([])
 
 const colorOptions = [
   { label: 'Noir', value: 'black' },
@@ -268,7 +284,8 @@ const form = ref({
   size: '',
   productUrl: '',
   description: '',
-  images: [] as File[],
+  presentationImages: [] as File[],
+  galleryImages: [] as File[],
   price: 0,
   oldPrice: 0,
   discount: 0,
@@ -290,11 +307,25 @@ const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR', { style:
 
 const goBack = () => router.push(`/apps/ecommerce/product-details/${route.params.id}`)
 
+const removeGalleryImage = (index: number) => {
+  galleryUrls.value.splice(index, 1)
+}
+
 const loadCategories = async () => {
   categories.value = (await getCategories()).map((item) => ({
     name: item.categoryName || item.name || item.slug,
     slug: item.slug,
   }))
+}
+
+const resolveCategorySlug = (value?: string) => {
+  const normalizedValue = (value || '').trim().toLocaleLowerCase('fr-FR')
+  const categoryMatch = categories.value.find((item) =>
+    item.slug.toLocaleLowerCase('fr-FR') === normalizedValue ||
+    item.name.toLocaleLowerCase('fr-FR') === normalizedValue
+  )
+
+  return categoryMatch?.slug || value || ''
 }
 
 const loadBrands = async () => {
@@ -353,8 +384,10 @@ const handleUpdate = async () => {
       condition: (form.value.condition || '').trim() || undefined,
       description: form.value.description || '',
       discount: Number(form.value.discount || 0),
-      imageFile: form.value.images[0] || null,
+      imageFile: form.value.presentationImages[0] || null,
       imageUrl: currentImageUrl.value || '',
+      galleryFiles: form.value.galleryImages,
+      galleryUrls: galleryUrls.value,
       oldPrice: Number(form.value.oldPrice || 0),
       price: priceTaxIncluded.value,
       basePrice: priceTaxIncluded.value,
@@ -387,7 +420,8 @@ onMounted(async () => {
     if (!product) { fetchError.value = 'Produit introuvable.'; return }
 
     currentImageUrl.value = product.imageUrl || ''
-    category.value = product.category || ''
+    galleryUrls.value = [...(product.galleryUrls || [])]
+    category.value = resolveCategorySlug(product.category)
     selectedTaxRateId.value = product.taxRateId || taxRates.value.find((taxRate) => taxRate.rate === (product.tvaRate ?? product.taxRate))?.id || ''
     form.value = {
       title: product.title || '',
@@ -398,7 +432,8 @@ onMounted(async () => {
       size: product.size || '',
       productUrl: product.productUrl || '',
       description: product.description || '',
-      images: [],
+      presentationImages: [],
+      galleryImages: [],
       price: product.priceExcludingTax ?? getPriceExcludingTax(product),
       oldPrice: product.oldPrice ?? 0,
       discount: product.discount ?? 0,

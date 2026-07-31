@@ -1,8 +1,21 @@
 import { collection, doc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
+import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { db } from '~/lib/firebase/firestore'
+import { storage } from '~/lib/firebase/storage'
 import type { Washer, WasherReview, WasherAddon, WasherService } from '~/types/washer'
 
 const WASHERS_COLLECTION = 'laveurs'
+
+export const uploadWasherGalleryImages = async (washerId: string, files: File[]) => {
+  return Promise.all(files.map(async (file) => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const filename = `${Date.now()}-${crypto.randomUUID()}.${extension}`
+    const imageRef = storageRef(storage, `laveurs/${washerId}/gallery/${filename}`)
+
+    await uploadBytes(imageRef, file)
+    return getDownloadURL(imageRef)
+  }))
+}
 
 const getDateValue = (value?: unknown) => {
   if (!value) return 0

@@ -9,6 +9,7 @@ export type Product = {
   discount: number | null
   id: string
   imageUrl: string
+  galleryUrls?: string[]
   laveurId: string
   oldPrice: number | null
   price: number
@@ -37,6 +38,7 @@ export type CreateProductInput = {
   discount: number
   id?: string
   imageFile?: File | null
+  galleryFiles?: File[]
   laveurId: string
   oldPrice: number
   price: number
@@ -64,6 +66,8 @@ export type UpdateProductInput = {
   discount: number
   imageFile?: File | null
   imageUrl: string
+  galleryFiles?: File[]
+  galleryUrls?: string[]
   oldPrice: number
   price: number
   priceExcludingTax?: number

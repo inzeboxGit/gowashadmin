@@ -94,15 +94,23 @@
 
           <BCard no-body>
             <BCardHeader class="d-block p-3">
-              <h4 class="card-title mb-1">Image du produit</h4>
-              <p class="text-muted mb-0">Pour télécharger une image du produit, veuillez utiliser l'option ci-dessous
-                pour sélectionner et télécharger le fichier pertinent.</p>
+              <h4 class="card-title mb-1">Photos du produit</h4>
+              <p class="text-muted mb-0">Ajoutez une image de présentation, puis les photos supplémentaires de la
+                galerie.</p>
             </BCardHeader>
 
             <BCardBody>
               <BRow>
                 <BCol cols="12">
-                  <FileUploader v-model="form.images" />
+                  <label class="form-label fw-semibold">Image de présentation</label>
+                  <p class="text-muted fs-sm">Cette image sera enregistrée dans <code>imageUrl</code>.</p>
+                  <FileUploader v-model="form.presentationImages" />
+                </BCol>
+                <BCol cols="12" class="mt-4">
+                  <label class="form-label fw-semibold">Galerie photos</label>
+                  <p class="text-muted fs-sm">Vous pouvez sélectionner plusieurs images. Elles seront enregistrées dans
+                    le tableau <code>galleryUrls</code>.</p>
+                  <FileUploader v-model="form.galleryImages" />
                 </BCol>
               </BRow>
             </BCardBody>
@@ -216,7 +224,7 @@
                 <div class="app-search">
                   <BFormSelect v-model="category" class="form-control my-1 my-md-0" id="category">
                     <option value="All">Choisir la catégorie</option>
-                    <option v-for="item in categories" :key="item.slug" :value="item.name">{{ item.name }}</option>
+                    <option v-for="item in categories" :key="item.slug" :value="item.slug">{{ item.name }}</option>
                   </BFormSelect>
                   <Icon icon="layout-grid" class="app-search-icon text-muted" />
                 </div>
@@ -304,7 +312,7 @@ const { user } = useAuth()
 const router = useRouter()
 
 const initialDescription =
-  `<p>Introducing the <strong><em>Azure Comfort Single Sofa</em></strong>, a perfect blend of modern design and luxurious comfort.</p><p>This premium blue single sofa is designed to elevate any living space with its sleek profile and rich, durable fabric. It’s the perfect seating option for your living room, lounge area, or cozy reading nook.</p><ul><li data-list="bullet"><span class="ql-ui" contenteditable="false"></span>Crafted with a solid mahogany frame for enhanced durability.</li><li data-list="bullet"><span class="ql-ui" contenteditable="false"></span>Upholstered in a high-quality blue fabric that offers both style and comfort.</li></ul>`
+  ``
 
 const form = ref({
   title: '',
@@ -313,7 +321,8 @@ const form = ref({
   price: 0,
   discount: 0,
   brandName: '',
-  images: [] as File[],
+  presentationImages: [] as File[],
+  galleryImages: [] as File[],
   reference: '',
   color: '',
   condition: '',
@@ -360,7 +369,8 @@ const resetForm = () => {
     price: 0,
     discount: 0,
     brandName: '',
-    images: [],
+    presentationImages: [],
+    galleryImages: [],
     reference: '',
     color: '',
     condition: '',
@@ -437,7 +447,8 @@ const handleCreateProduct = async (published: boolean) => {
       category: selectedCategory.value,
       description: form.value.description,
       discount: Number(form.value.discount || 0),
-      imageFile: form.value.images[0] || null,
+      imageFile: form.value.presentationImages[0] || null,
+      galleryFiles: form.value.galleryImages,
       laveurId: user.value?.uid || '',
       oldPrice: Number(form.value.discount || 0) > 0 ? Number(form.value.price) : 0,
       price: priceTaxIncluded.value,

@@ -30,6 +30,17 @@ const uploadProductImage = async (productId: string, imageFile?: File | null) =>
   return getDownloadURL(imageRef)
 }
 
+const uploadProductGalleryImages = async (productId: string, files: File[] = []) => {
+  return Promise.all(files.map(async (file) => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const filename = `${Date.now()}-${crypto.randomUUID()}.${extension}`
+    const imageRef = storageRef(storage, `products/${productId}/gallery/${filename}`)
+
+    await uploadBytes(imageRef, file)
+    return getDownloadURL(imageRef)
+  }))
+}
+
 export const getProducts = async () => {
   const snapshot = await getDocs(query(collection(db, PRODUCTS_COLLECTION), orderBy('createdAt', 'desc')))
 
@@ -57,6 +68,7 @@ export const createProduct = async (input: CreateProductInput) => {
   const requestedId = input.id ? sanitizeProductId(input.id) : ''
   const productRef = requestedId ? doc(db, PRODUCTS_COLLECTION, requestedId) : doc(collection(db, PRODUCTS_COLLECTION))
   const imageUrl = await uploadProductImage(productRef.id, input.imageFile)
+  const galleryUrls = await uploadProductGalleryImages(productRef.id, input.galleryFiles)
   const now = new Date().toISOString()
 
   const payload: Product = {
@@ -70,6 +82,7 @@ export const createProduct = async (input: CreateProductInput) => {
     discount: input.discount,
     id: productRef.id,
     imageUrl,
+    galleryUrls,
     laveurId: input.laveurId,
     oldPrice: input.oldPrice,
     price: input.price,
@@ -96,6 +109,8 @@ export const createProduct = async (input: CreateProductInput) => {
 export const updateProduct = async (id: string, input: UpdateProductInput) => {
   const productRef = doc(db, PRODUCTS_COLLECTION, id)
   const imageUrl = input.imageFile ? await uploadProductImage(id, input.imageFile) : input.imageUrl
+  const uploadedGalleryUrls = await uploadProductGalleryImages(id, input.galleryFiles)
+  const galleryUrls = [...(input.galleryUrls || []), ...uploadedGalleryUrls]
   const now = new Date().toISOString()
 
   const fields: Partial<Product> & { updatedAt: string } = {
@@ -107,6 +122,7 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
     description: input.description,
     discount: input.discount,
     imageUrl,
+    ...(input.galleryUrls !== undefined && { galleryUrls }),
     oldPrice: input.oldPrice,
     price: input.price,
     ...(input.priceExcludingTax !== undefined && { priceExcludingTax: input.priceExcludingTax }),

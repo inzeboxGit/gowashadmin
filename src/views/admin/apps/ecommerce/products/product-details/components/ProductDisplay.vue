@@ -2,7 +2,7 @@
   <BCard no-body class="card-top-sticky border-0">
     <BCardBody class="p-0">
       <BCarousel id="product-carousel" v-model="activeSlide" fade class="bg-opacity-25 rounded-3">
-        <BCarouselSlide :img-src="product.imageUrl" class="text-center bg-transparent" />
+        <BCarouselSlide v-for="(image, index) in productImages" :key="image" :img-src="image" class="text-center bg-transparent" />
       </BCarousel>
 
       <div class="text-center my-3">
@@ -21,13 +21,14 @@
 
 <script setup lang="ts">
 import { BButton, BCard, BCardBody, BCarousel, BCarouselSlide, BSpinner } from 'bootstrap-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { setProductPublished } from '~/services/products.service'
 import type { Product } from '~/types/product'
 import Icon from '~/components/wrappers/Icon.vue'
 
 const props = defineProps<{ product: Product }>()
+const productImages = computed(() => [props.product.imageUrl, ...(props.product.galleryUrls || [])].filter(Boolean))
 const emit = defineEmits<{ (e: 'updated'): void }>()
 
 const router = useRouter()
