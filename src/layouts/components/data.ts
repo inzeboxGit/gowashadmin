@@ -88,6 +88,12 @@ export const menuItems: MenuItemType[] = [
             'slug': 'pages:apps-ecommerce-tax-rates',
             'label': 'Gestion de TVA',
           },
+          {
+            'url': '/apps/ecommerce/transport-suppliers',
+            'icon': 'truck',
+            'slug': 'pages:apps-ecommerce-transport-suppliers',
+            'label': 'Gestion transport',
+          },
 
           // {
           //   'url': '/apps/ecommerce/customers',

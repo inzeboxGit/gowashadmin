@@ -27,10 +27,10 @@
           <span>TVA appliquée</span><span>{{ product.tvaRate }} %</span>
         </div>
         <div class="d-flex justify-content-between fw-semibold">
-          <span>Prix TTC</span><span>{{ product.basePrice?.toFixed(2) }} MAD</span>
+          <span>Prix TTC</span><span>{{ product.basePrice?.toFixed(2) }} Euro</span>
         </div>
         <div class="d-flex justify-content-between text-muted mt-1">
-          <span>Prix HT</span><span>{{ (product.priceExcludingTax ?? product.price).toFixed(2) }} MAD</span>
+          <span>Prix HT</span><span>{{ (product.priceExcludingTax ?? product.price).toFixed(2) }} Euro</span>
         </div>
       </div>
     </BCardBody>
@@ -39,8 +39,10 @@
       <div class="d-flex justify-content-start align-items-center gap-2">
         <h5 class="d-flex align-items-center gap-2 mb-0"
           :class="product.discount && product.discount > 20 ? 'text-success' : 'text-danger'">
-          <span class="text-muted text-decoration-line-through"> {{ (product.priceExcludingTax ?? product.price).toFixed(2) }} MAD HT </span>
-          {{ ((product.priceExcludingTax ?? product.price) - ((product.priceExcludingTax ?? product.price) * (product.discount ?? 10)) / 100).toFixed(2) }} MAD HT
+          <span class="text-muted text-decoration-line-through"> {{ (product.priceExcludingTax ??
+            product.price).toFixed(2) }} Euro HT </span>
+          {{ ((product.priceExcludingTax ?? product.price) - ((product.priceExcludingTax ?? product.price) *
+            (product.discount ?? 10)) / 100).toFixed(2) }} Euro HT
         </h5>
       </div>
 

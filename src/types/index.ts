@@ -19,3 +19,4 @@ export type MenuItemType = {
 
 export * from './promo'
 export * from './push-notification'
+export * from './supplier'

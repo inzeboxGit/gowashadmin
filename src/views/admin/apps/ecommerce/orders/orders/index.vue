@@ -117,7 +117,8 @@
             </div>
           </template>
           <template #cell(amount)="{ item }">
-            <span class="fw-bold">{{ item.totalPrice || item.serviceSnapshot?.totalPrice || item.serviceSnapshot?.price || 0 }} MAD</span>
+            <span class="fw-bold">{{ item.totalPrice || item.serviceSnapshot?.totalPrice || item.serviceSnapshot?.price
+              || 0 }} Euro</span>
           </template>
           <template #cell(paymentStatus)="{ item }">
             <span class="fw-semibold text-success">

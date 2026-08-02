@@ -103,7 +103,7 @@ const totalItems = computed(() => orders.value.length)
 const formatAmount = (value: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'MAD',
+    currency: 'Euro',
     maximumFractionDigits: 2,
   }).format(value)
 }

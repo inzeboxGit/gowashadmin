@@ -86,7 +86,7 @@
              <div class="d-flex align-items-center gap-2">
                <Icon icon="banknote" class="text-success fs-5" />
                <div class="lh-sm">
-                 <div class="fw-bold fs-6">{{ totalSpent.toFixed(2) }} MAD</div>
+                <div class="fw-bold fs-6">{{ totalSpent.toFixed(2) }} Euro</div>
                  <div class="text-muted fs-xs text-uppercase letter-spacing-1">Total Dépensé</div>
                </div>
              </div>
@@ -217,7 +217,7 @@
                         {{ res.serviceSnapshot?.washerName || res.washerSnapshot?.name || '—' }}
                       </td>
                       <td class="py-3 fw-bold text-dark">
-                        {{ res.serviceSnapshot?.totalPrice || res.serviceSnapshot?.price || 0 }} MAD
+                        {{ res.serviceSnapshot?.totalPrice || res.serviceSnapshot?.price || 0 }} Euro
                       </td>
                       <td class="py-3">
                         <span class="badge fs-xxs" :class="getReservationStatusBadgeClass(res.serviceSnapshot?.status || res.status)">

@@ -6,6 +6,13 @@
     {{ successMessage }}
   </BAlert>
 
+  <BAlert v-if="showSupplierIdNotice && productsWithoutSupplierCount > 0" variant="warning" dismissible show
+    @closed="showSupplierIdNotice = false">
+    Note : {{ productsWithoutSupplierCount }} ancien(s) produit(s) n'ont pas encore de fournisseur. Lors de leur
+    prochaine modification, il sera nécessaire de sélectionner un fournisseur avant de sauvegarder afin de garantir un
+    calcul fiable du taux de transport.
+  </BAlert>
+
   <BRow>
     <BCol xs="12">
       <BCard no-body>
@@ -213,6 +220,7 @@ type ProductTableItem = {
   reviews: number
   status: 'published' | 'pending' | 'out-of-stock'
   tvaRate: number
+  supplierId: string
   date: string
   time: string
 }
@@ -255,6 +263,7 @@ const importing = ref(false)
 const csvInput = ref<HTMLInputElement | null>(null)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
+const showSupplierIdNotice = ref(true)
 const route = useRoute()
 const router = useRouter()
 
@@ -265,6 +274,8 @@ const productCategories = computed(() => {
 const productBrands = computed(() => {
   return [...new Set(products.value.map((product) => product.brand).filter(Boolean))].sort()
 })
+
+const productsWithoutSupplierCount = computed(() => products.value.filter((product) => !product.supplierId).length)
 
 const normalizeBrandForFilter = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '_')
 
@@ -355,6 +366,7 @@ const mapProductToTableItem = (product: Product): ProductTableItem => {
     reviews: 0,
     status: product.published ? 'published' : 'pending',
     tvaRate: product.tvaRate ?? product.taxRate ?? 0,
+    supplierId: product.supplierId || '',
     date: publishedDate.date,
     time: publishedDate.time,
   }

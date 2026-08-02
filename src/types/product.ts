@@ -19,6 +19,7 @@ export type Product = {
   reference?: string
   size?: string
   stock?: number | null
+  supplierId: string
   taxAmount?: number
   taxRate?: number
   taxRateId?: string
@@ -48,6 +49,7 @@ export type CreateProductInput = {
   reference?: string
   size?: string
   stock: number
+  supplierId: string
   taxAmount?: number
   taxRate?: number
   taxRateId?: string
@@ -76,6 +78,7 @@ export type UpdateProductInput = {
   reference?: string
   size?: string
   stock: number
+  supplierId: string
   taxAmount?: number
   taxRate?: number
   taxRateId?: string

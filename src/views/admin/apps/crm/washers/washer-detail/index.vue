@@ -277,7 +277,7 @@
                   <div class="sa-card-footer mt-auto pt-3">
                     <div class="sa-price-minimal mb-3">
                       {{ item.prices && Object.keys(item.prices).length ? Math.min(...Object.values(item.prices)) +
-                        'MAD' : '— MAD' }}
+  'Euro' : '— Euro' }}
                     </div>
                     <div class="mt-auto d-flex gap-2">
                       <button class="btn btn-sm btn-light flex-grow-1" @click="openDetail('service', item)">
@@ -312,7 +312,7 @@
                     <div class="text-muted fs-xs">{{ item.vehicleCategory || 'Toutes catégories' }}</div>
                   </div>
                   <div class="sa-card-footer mt-auto pt-3">
-                    <div class="sa-price-minimal mb-3">{{ item.basePrice || 0 }} MAD</div>
+                    <div class="sa-price-minimal mb-3">{{ item.basePrice || 0 }} Euro</div>
                     <div class="mt-auto d-flex gap-2">
                       <button class="btn btn-sm btn-light flex-grow-1" @click="openDetail('addon', item)">
                         Voir détail
@@ -454,7 +454,7 @@
                         <div class="fw-medium text-dark">{{ res.packageName || res.serviceSnapshot?.name || '—' }}</div>
                       </td>
                       <td class="py-3 fw-bold text-dark">
-                        {{ res.serviceSnapshot?.totalPrice || res.serviceSnapshot?.price || 0 }} MAD
+                        {{ res.serviceSnapshot?.totalPrice || res.serviceSnapshot?.price || 0 }} Euro
                       </td>
                       <td class="py-3">
                         <span class="fw-semibold text-success">
@@ -515,14 +515,14 @@
         <template v-if="detailModalType === 'addon'">
           <div class="d-flex align-items-baseline gap-2 mb-3">
             <span class="fs-2 fw-bold text-dark">{{ (detailModal as any).basePrice || 0 }}</span>
-            <span class="text-muted fw-medium">MAD</span>
+            <span class="text-muted fw-medium">Euro</span>
           </div>
           <div v-if="(detailModal as any).categoryPrices && Object.keys((detailModal as any).categoryPrices).length">
             <div class="text-muted fs-xs mb-2">Prix spécifiques :</div>
             <div class="d-flex gap-2 flex-wrap">
               <div v-for="(price, cat) in (detailModal as any).categoryPrices" :key="cat" class="price-chip-minimal">
                 <span class="text-muted fs-xs text-capitalize mb-1">{{ cat }}</span>
-                <span class="fw-bold">{{ price }} MAD</span>
+                <span class="fw-bold">{{ price }} Euro</span>
               </div>
             </div>
           </div>
@@ -536,7 +536,7 @@
             class="d-flex gap-2 flex-wrap">
             <div v-for="(price, cat) in (detailModal as any).prices" :key="cat" class="price-chip-minimal">
               <span class="text-muted fs-xs text-capitalize mb-1">{{ cat }}</span>
-              <span class="fw-bold fs-6">{{ price }} MAD</span>
+              <span class="fw-bold fs-6">{{ price }} Euro</span>
             </div>
           </div>
           <p v-else class="text-muted fs-sm">Aucun prix défini.</p>

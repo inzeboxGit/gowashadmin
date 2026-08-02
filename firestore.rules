@@ -30,6 +30,74 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    function isSuperUser() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/supers/$(request.auth.uid));
+    }
+
+    function isValidSupplierRange(range) {
+      return range.keys().hasOnly(['min', 'max', 'price'])
+          && range.keys().hasAll(['min', 'max', 'price'])
+          && range.min is number
+          && range.max is number
+          && range.price is number
+          && range.min >= 0
+          && range.max > range.min
+          && range.price >= 0;
+    }
+
+    function isValidSupplierShipping(shipping) {
+      return shipping is map
+          && (
+            (
+              shipping.keys().hasOnly(['type', 'price'])
+              && shipping.keys().hasAll(['type', 'price'])
+              && shipping.type == 'fixed'
+              && shipping.price is number
+              && shipping.price >= 0
+            )
+            || (
+              shipping.keys().hasOnly(['type', 'ranges'])
+              && shipping.keys().hasAll(['type', 'ranges'])
+              && (shipping.type == 'amount' || shipping.type == 'weight')
+              && shipping.ranges is list
+              && shipping.ranges.size() == 3
+              && isValidSupplierRange(shipping.ranges[0])
+              && isValidSupplierRange(shipping.ranges[1])
+              && isValidSupplierRange(shipping.ranges[2])
+            )
+          );
+    }
+
+    function isValidSupplier(data) {
+      return data.keys().hasOnly(['id', 'name', 'shipping', 'createdAt', 'updatedAt'])
+          && data.keys().hasAll(['id', 'name', 'shipping', 'createdAt', 'updatedAt'])
+          && data.id is string
+          && data.id.size() > 0
+          && data.id.size() <= 80
+          && data.name is string
+          && data.name.size() > 0
+          && data.name.size() <= 120
+          && isValidSupplierShipping(data.shipping)
+          && data.createdAt is timestamp
+          && data.updatedAt is timestamp;
+    }
+
+    match /suppliers/{supplierId} {
+      allow read: if isSuperUser();
+      allow create: if isSuperUser()
+          && request.resource.data.id == supplierId
+          && isValidSupplier(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+      allow update: if isSuperUser()
+          && request.resource.data.id == supplierId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time
+          && isValidSupplier(request.resource.data);
+      allow delete: if false;
+    }
+
     // ---- Profil laveur: privé pour le pro.
     match /laveurs/{userId} {
       allow read: if isOwner(userId);

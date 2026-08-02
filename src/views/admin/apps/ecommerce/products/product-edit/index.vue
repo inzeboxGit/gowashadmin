@@ -17,10 +17,19 @@
               <BAlert v-if="successMessage" variant="success" show>{{ successMessage }}</BAlert>
 
               <BRow>
-                <BCol cols="12">
+                <BCol lg="6">
                   <div class="mb-3">
                     <label for="productName" class="form-label"> Nom du produit <span class="text-danger">*</span> </label>
                     <BFormInput id="productName" v-model="form.title" type="text" placeholder="Nom du produit" required />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
+                    <label for="supplierId" class="form-label"> Fournisseur <span class="text-danger">*</span> </label>
+                    <BFormSelect id="supplierId" v-model="form.supplierId" :options="supplierOptions" class="form-select" required />
+                    <small v-if="suppliersLoading" class="text-muted">Chargement des fournisseurs...</small>
+                    <small v-else-if="suppliersError" class="text-danger">{{ suppliersError }}</small>
                   </div>
                 </BCol>
 
@@ -59,6 +68,9 @@
                   <div class="mb-3">
                     <label for="size" class="form-label"> Taille / Contenance </label>
                     <BFormInput id="size" v-model="form.size" type="text" placeholder="Ex: 1L, 5kg" />
+                    <span v-if="transportSimulation.message" class="badge fs-xxs mt-2" :class="transportSimulationBadgeClass">
+                      {{ transportSimulation.message }}
+                    </span>
                   </div>
                 </BCol>
 
@@ -238,7 +250,9 @@ import Icon from '~/components/wrappers/Icon.vue'
 import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
 import { getProductById, updateProduct } from '~/services/products.service'
+import { getSuppliers } from '~/services/suppliers.service'
 import { getTaxRates } from '~/services/tax-rates.service'
+import type { Supplier, SupplierShippingRange } from '~/types/supplier'
 import type { TaxRate } from '~/types/tax-rate'
 
 const route = useRoute()
@@ -246,7 +260,10 @@ const router = useRouter()
 
 const categories = ref<{ name: string; slug: string }[]>([])
 const brands = ref<{ id: string; name: string }[]>([])
+const suppliers = ref<Pick<Supplier, 'id' | 'name' | 'shipping'>[]>([])
 const category = ref('')
+const suppliersLoading = ref(false)
+const suppliersError = ref<string | null>(null)
 const brandsLoading = ref(false)
 const brandsError = ref<string | null>(null)
 const taxRates = ref<TaxRate[]>([])
@@ -277,6 +294,7 @@ const colorOptions = [
 
 const form = ref({
   title: '',
+  supplierId: '',
   reference: '',
   stock: 0,
   color: '',
@@ -297,13 +315,67 @@ const filteredBrands = computed(() => {
   const search = form.value.brandName.trim().toLocaleLowerCase('fr-FR')
   return brands.value.filter((brand) => brand.name.toLocaleLowerCase('fr-FR').includes(search))
 })
+const supplierOptions = computed(() => [
+  { value: '', text: 'Sélectionner un fournisseur' },
+  ...suppliers.value.map((supplier) => ({ value: supplier.id, text: supplier.name })),
+])
+const selectedSupplier = computed(() => suppliers.value.find((supplier) => supplier.id === form.value.supplierId))
 const selectedTaxRate = computed(() => taxRates.value.find((taxRate) => taxRate.id === selectedTaxRateId.value))
 const availableTaxRates = computed(() => taxRates.value.filter((taxRate) => taxRate.isActive || taxRate.id === selectedTaxRateId.value))
 const taxAmount = computed(() => Number((Number(form.value.price || 0) * Number(selectedTaxRate.value?.rate || 0) / 100).toFixed(2)))
 const priceTaxIncluded = computed(() => Number((Number(form.value.price || 0) + taxAmount.value).toFixed(2)))
+const parsedWeightKg = computed(() => parseWeightKg(form.value.size))
+const transportSimulation = computed(() => getTransportSimulation())
+const transportSimulationBadgeClass = computed(() => {
+  if (transportSimulation.value.isError) return 'badge-soft-danger'
+  if (selectedSupplier.value?.shipping.type === 'fixed') return 'badge-soft-info'
+  return 'badge-soft-success'
+})
 
 const formatTaxRate = (rate: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(rate)} %`
-const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(amount)
+const formatAmount = (amount: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount)
+
+const parseWeightKg = (value: string) => {
+  const match = value.trim().toLowerCase().replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilogramme|kilogrammes|g|gr|gramme|grammes)\b/)
+  if (!match) return null
+
+  const amount = Number(match[1])
+  if (!Number.isFinite(amount)) return null
+
+  return ['g', 'gr', 'gramme', 'grammes'].includes(match[2]) ? amount / 1000 : amount
+}
+
+const findRangePrice = (value: number, ranges: SupplierShippingRange[]) => {
+  if (!Array.isArray(ranges)) return null
+  return ranges.find((range) => value >= range.min && value <= range.max)?.price ?? null
+}
+
+const getTransportSimulation = () => {
+  const supplier = selectedSupplier.value
+  if (!supplier) return { message: '', isError: false }
+
+  const shipping = supplier.shipping
+  if (shipping.type === 'fixed') {
+    return { message: `Transport estimé : ${formatAmount(shipping.price)} (tarif fixe)`, isError: false }
+  }
+
+  if (shipping.type === 'amount') {
+    const price = findRangePrice(priceTaxIncluded.value, shipping.ranges)
+    if (price === null) return { message: 'Aucune tranche transport ne correspond au prix actuel du produit.', isError: true }
+
+    return { message: `Transport estimé : ${formatAmount(price)} selon le prix TTC actuel du produit.`, isError: false }
+  }
+
+  const weight = parsedWeightKg.value
+  if (weight === null) {
+    return { message: 'Saisir un poids dans Taille / Contenance pour simuler le transport, ex : 500g ou 5kg.', isError: true }
+  }
+
+  const price = findRangePrice(weight, shipping.ranges)
+  if (price === null) return { message: 'Aucune tranche transport ne correspond au poids saisi.', isError: true }
+
+  return { message: `Transport estimé : ${formatAmount(price)} pour ${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(weight)} kg.`, isError: false }
+}
 
 const goBack = () => router.push(`/apps/ecommerce/product-details/${route.params.id}`)
 
@@ -341,6 +413,19 @@ const loadBrands = async () => {
   }
 }
 
+const loadSuppliers = async () => {
+  try {
+    suppliersLoading.value = true
+    suppliersError.value = null
+    suppliers.value = (await getSuppliers()).map(({ id, name, shipping }) => ({ id, name, shipping }))
+  } catch (err) {
+    console.error('[product-edit] Failed to load suppliers', err)
+    suppliersError.value = 'Impossible de charger les fournisseurs.'
+  } finally {
+    suppliersLoading.value = false
+  }
+}
+
 const loadTaxRates = async () => {
   try {
     taxRatesLoading.value = true
@@ -371,13 +456,14 @@ const handleUpdate = async () => {
     error.value = null
     successMessage.value = null
 
-    if (!form.value.title.trim() || !category.value || !form.value.price) {
-      error.value = 'Nom, catégorie et prix sont obligatoires.'
+    if (!form.value.title.trim() || !form.value.supplierId || !category.value || !form.value.price) {
+      error.value = 'Nom, fournisseur, catégorie et prix sont obligatoires.'
       return
     }
 
     await updateProduct(route.params.id as string, {
       title: form.value.title.trim(),
+      supplierId: form.value.supplierId,
       brandName: (form.value.brandName || '').trim(),
       category: category.value,
       color: (form.value.color || '').trim() || undefined,
@@ -414,7 +500,7 @@ const handleUpdate = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([loadCategories(), loadBrands(), loadTaxRates()])
+  await Promise.all([loadCategories(), loadBrands(), loadSuppliers(), loadTaxRates()])
   try {
     const product = await getProductById(route.params.id as string)
     if (!product) { fetchError.value = 'Produit introuvable.'; return }
@@ -425,6 +511,7 @@ onMounted(async () => {
     selectedTaxRateId.value = product.taxRateId || taxRates.value.find((taxRate) => taxRate.rate === (product.tvaRate ?? product.taxRate))?.id || ''
     form.value = {
       title: product.title || '',
+      supplierId: product.supplierId || '',
       reference: product.reference || '',
       stock: product.stock ?? 0,
       color: product.color || '',

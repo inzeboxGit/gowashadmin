@@ -131,6 +131,12 @@ export const allRoutes = [
             component: () => import('~/views/admin/apps/ecommerce/tax-rates/index.vue')
         },
         {
+            path: '/apps/ecommerce/transport-suppliers',
+            name: 'apps.ecommerce.transport-suppliers',
+            meta: { title: 'Gestion transport' },
+            component: () => import('~/views/admin/apps/ecommerce/transport-suppliers/index.vue')
+        },
+        {
             path: '/apps/ecommerce/customers',
             name: 'apps.ecommerce.customers',
             meta: { title: 'Clients' },
