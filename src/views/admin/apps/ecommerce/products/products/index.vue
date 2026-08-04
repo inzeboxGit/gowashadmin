@@ -96,11 +96,11 @@
               <Icon v-else icon="download" class="fs-sm me-2" />
               Exporter les produits
             </BButton>
-            <BButton variant="info" class="ms-1" :disabled="assigningSuppliers" @click="handleAssignSuppliersByBrand">
+            <!-- <BButton variant="info" class="ms-1" :disabled="assigningSuppliers" @click="handleAssignSuppliersByBrand">
               <BSpinner v-if="assigningSuppliers" small class="me-2" />
               <Icon v-else icon="truck" class="fs-sm me-2" />
               Attribuer les fournisseurs
-            </BButton>
+            </BButton> -->
           </div>
         </BCardHeader>
 

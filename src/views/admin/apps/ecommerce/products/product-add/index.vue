@@ -279,9 +279,9 @@
       </BRow>
 
       <div class="mt-2 mb-4 d-flex gap-2 justify-content-center">
-        <BButton variant="danger" class="fw-semibold" :disabled="loading" @click="resetForm"> Discard </BButton>
-        <BButton variant="secondary" :disabled="loading" @click="handleCreateProduct(false)"> Save as Draft</BButton>
-        <BButton variant="success" :disabled="loading" @click="handleCreateProduct(true)"> Publish </BButton>
+        <BButton variant="danger" class="fw-semibold" :disabled="loading" @click="resetForm"> Brouillon
+        </BButton>
+        <BButton variant="success" :disabled="loading" @click="handleCreateProduct(true)"> Publier </BButton>
       </div>
     </BCol>
   </BRow>

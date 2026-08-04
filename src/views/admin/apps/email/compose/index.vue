@@ -75,7 +75,7 @@
               <BDropdownItem href="#">Schedule Send</BDropdownItem>
               <BDropdownItem href="#">Save as Draft</BDropdownItem>
               <BDropdownDivider />
-              <BDropdownItem href="#">Discard</BDropdownItem>
+              <BDropdownItem href="#">Annuler</BDropdownItem>
             </BDropdown>
             <div class="d-flex gap-2 ms-auto">
               <BTooltip title="Settings" placement="top" trigger="hover">
