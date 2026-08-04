@@ -26,6 +26,7 @@ export type Product = {
   taxRateName?: string
   title: string
   tvaRate?: number
+  weightKg?: number
   updatedAt: string
 }
 
@@ -56,6 +57,7 @@ export type CreateProductInput = {
   taxRateName?: string
   title: string
   tvaRate?: number
+  weightKg?: number
 }
 
 export type UpdateProductInput = {
@@ -85,4 +87,5 @@ export type UpdateProductInput = {
   taxRateName?: string
   title: string
   tvaRate?: number
+  weightKg?: number
 }

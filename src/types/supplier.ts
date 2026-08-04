@@ -28,6 +28,7 @@ export type LegacySupplierShipping = {
 export type Supplier = {
   id: string
   name: string
+  shipping_threshold?: number
   shipping: SupplierShipping
   createdAt?: string | Date | Timestamp | FieldValue
   updatedAt?: string | Date | Timestamp | FieldValue

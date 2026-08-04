@@ -6,6 +6,12 @@ import type { CreateProductInput, Product, UpdateProductInput } from '~/types/pr
 
 const PRODUCTS_COLLECTION = 'products'
 
+const SUPPLIER_IDS_BY_BRAND: Record<string, string> = {
+  de_witte: 'MEdUIudrIOaziQV1JLHr',
+  starc: 'bVPMjrn5IM3PGlMdg3bK',
+  virtus: '7z1C03BR55ZXoOaXW8Vb',
+}
+
 const sanitizeProductId = (value: string) => {
   return value
     .trim()
@@ -99,6 +105,7 @@ export const createProduct = async (input: CreateProductInput) => {
     ...(input.taxRateName !== undefined && { taxRateName: input.taxRateName }),
     title: input.title,
     ...(input.tvaRate !== undefined && { tvaRate: input.tvaRate }),
+    ...(input.weightKg !== undefined && { weightKg: input.weightKg }),
     updatedAt: now,
   }
 
@@ -139,6 +146,7 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
     ...(input.taxRateName !== undefined && { taxRateName: input.taxRateName }),
     title: input.title,
     ...(input.tvaRate !== undefined && { tvaRate: input.tvaRate }),
+    ...(input.weightKg !== undefined && { weightKg: input.weightKg }),
     updatedAt: now,
   }
 
@@ -149,6 +157,31 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
 
 export const setProductPublished = async (id: string, published: boolean) => {
   await updateDoc(doc(db, PRODUCTS_COLLECTION, id), { published, updatedAt: new Date().toISOString() })
+}
+
+export const assignSuppliersByBrand = async () => {
+  const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION))
+  const updates = snapshot.docs.filter((productDoc) => {
+    const product = productDoc.data() as Partial<Product>
+    return Boolean(SUPPLIER_IDS_BY_BRAND[normalizeBrandName(product.brandName || '')])
+  })
+  const now = new Date().toISOString()
+  const BATCH_SIZE = 500
+
+  for (let index = 0; index < updates.length; index += BATCH_SIZE) {
+    const batch = writeBatch(db)
+
+    for (const productDoc of updates.slice(index, index + BATCH_SIZE)) {
+      const product = productDoc.data() as Partial<Product>
+      const supplierId = SUPPLIER_IDS_BY_BRAND[normalizeBrandName(product.brandName || '')]
+
+      batch.update(productDoc.ref, { supplierId, updatedAt: now })
+    }
+
+    await batch.commit()
+  }
+
+  return updates.length
 }
 
 export const bulkImportProducts = async (seeds: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>[]) => {

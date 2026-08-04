@@ -88,6 +88,16 @@
               <Icon v-else icon="upload" class="fs-sm me-2" />
               Importer CSV
             </BButton>
+            <BButton variant="success" class="ms-1" :disabled="exporting" @click="handleExportProducts">
+              <BSpinner v-if="exporting" small class="me-2" />
+              <Icon v-else icon="download" class="fs-sm me-2" />
+              Exporter les produits
+            </BButton>
+            <BButton variant="info" class="ms-1" :disabled="assigningSuppliers" @click="handleAssignSuppliersByBrand">
+              <BSpinner v-if="assigningSuppliers" small class="me-2" />
+              <Icon v-else icon="truck" class="fs-sm me-2" />
+              Attribuer les fournisseurs
+            </BButton>
           </div>
         </BCardHeader>
 
@@ -127,9 +137,18 @@
                 <h5 class="mb-1">
                   <RouterLink :to="`/apps/ecommerce/product-details/${data.item.id}`" class="link-reset">{{ data.item.name }} </RouterLink>
                 </h5>
-                <p class="text-muted mb-0 fs-xxs">by: {{ data.item.brand }}</p>
+                <p v-if="data.item.color" class="text-muted mb-0 fs-xxs d-flex align-items-center gap-1">
+                  <span class="product-color-swatch" :style="{ backgroundColor: data.item.color }" />
+                  {{ data.item.color }}
+                </p>
+                <p v-else class="text-muted mb-0 fs-xxs">Couleur non définie</p>
               </div>
             </div>
+          </template>
+
+          <template #cell(supplier)="{ item }">
+            <span v-if="item.supplierId">{{ supplierNamesById[item.supplierId] || 'Fournisseur introuvable' }}</span>
+            <span v-else class="text-muted">-</span>
           </template>
 
           <template #cell(stock)="data">
@@ -199,7 +218,8 @@ import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
 import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
-import { bulkImportProducts, getProducts } from '~/services/products.service'
+import { assignSuppliersByBrand, bulkImportProducts, getProducts } from '~/services/products.service'
+import { getSuppliers } from '~/services/suppliers.service'
 import { toPascalCase } from '~/utils/helpers'
 import type { Product } from '~/types/product'
 
@@ -208,6 +228,7 @@ type ProductTableItem = {
   image: string
   name: string
   brand: string
+  color: string
   sku: string
   category: string
   stock: number
@@ -234,6 +255,7 @@ const fields = [
   { key: 'id', label: 'Id' },
   { key: 'name', label: 'Produit', sortable: true },
   { key: 'brand', label: 'Marque', sortable: true },
+  { key: 'supplier', label: 'Fournisseur', sortable: false },
   { key: 'sku', label: 'SKU' },
   { key: 'category', label: 'Catégorie' },
   { key: 'stock', label: 'Stock', sortable: true },
@@ -258,8 +280,11 @@ const totalRows = ref(0)
 const products = ref<ProductTableItem[]>([])
 const categories = ref<string[]>([])
 const brands = ref<string[]>([])
+const supplierNamesById = ref<Record<string, string>>({})
 const loading = ref(false)
 const importing = ref(false)
+const exporting = ref(false)
+const assigningSuppliers = ref(false)
 const csvInput = ref<HTMLInputElement | null>(null)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
@@ -302,6 +327,16 @@ const loadBrands = async () => {
   } catch (err) {
     console.error('[products] Failed to load brands', err)
     brands.value = []
+  }
+}
+
+const loadSupplierNames = async () => {
+  try {
+    const suppliers = await getSuppliers()
+    supplierNamesById.value = Object.fromEntries(suppliers.map((supplier) => [supplier.id, supplier.name]))
+  } catch (err) {
+    console.error('[products] Failed to load suppliers', err)
+    supplierNamesById.value = {}
   }
 }
 
@@ -354,6 +389,7 @@ const mapProductToTableItem = (product: Product): ProductTableItem => {
     image: product.imageUrl || '/images/products/1.png',
     name: product.title,
     brand: product.brandName,
+    color: product.color || '',
     sku: product.id,
     category: product.category,
     stock: product.stock ?? 0,
@@ -373,6 +409,12 @@ const mapProductToTableItem = (product: Product): ProductTableItem => {
 }
 
 const csvColumns = ['title', 'brandName', 'category', 'color', 'reference', 'stock', 'condition', 'size', 'description', 'price', 'oldPrice', 'discount', 'productUrl', 'imageUrl', 'published', 'laveurId']
+const exportCsvColumns = [
+  'id', 'title', 'brandName', 'category', 'color', 'reference', 'stock', 'condition', 'size', 'description',
+  'price', 'priceExcludingTax', 'basePrice', 'oldPrice', 'discount', 'productUrl', 'imageUrl', 'galleryUrls',
+  'published', 'laveurId', 'supplierId', 'taxAmount', 'taxRate', 'taxRateId', 'taxRateName', 'tvaRate', 'weightKg',
+  'createdAt', 'updatedAt',
+] as const
 
 const parseCsv = (content: string) => {
   const firstLine = content.split(/\r?\n/, 1)[0] || ''
@@ -410,6 +452,35 @@ const parseOptionalNumber = (value: string) => value.trim() === '' ? null : pars
 const parsePublished = (value: string) => {
   const normalizedValue = value.trim().toLowerCase()
   return normalizedValue === '' ? null : ['true', '1', 'oui', 'yes'].includes(normalizedValue)
+}
+
+const escapeCsvValue = (value: unknown) => {
+  const stringValue = Array.isArray(value) ? JSON.stringify(value) : String(value ?? '')
+  return `"${stringValue.replaceAll('"', '""')}"`
+}
+
+const handleExportProducts = async () => {
+  try {
+    exporting.value = true
+    error.value = null
+    successMessage.value = null
+    const productsToExport = await getProducts()
+    const rows = productsToExport.map((product) => exportCsvColumns.map((column) => escapeCsvValue(product[column])).join(';'))
+    const csv = `\uFEFF${exportCsvColumns.join(';')}\n${rows.join('\n')}`
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = `produits-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    successMessage.value = `${productsToExport.length} produit(s) exporté(s) dans le fichier CSV.`
+  } catch (err) {
+    console.error('[products] CSV export failed', err)
+    error.value = err instanceof Error ? err.message : 'Impossible d exporter les produits.'
+  } finally {
+    exporting.value = false
+  }
 }
 
 const handleImportCsv = async (event: Event) => {
@@ -470,14 +541,34 @@ const handleImportCsv = async (event: Event) => {
   }
 }
 
+const handleAssignSuppliersByBrand = async () => {
+  const confirmed = window.confirm(
+    'Attribuer les fournisseurs aux produits des marques de_witte, starc et virtus ? Les supplierId existants pour ces marques seront remplacés.',
+  )
+  if (!confirmed) return
+
+  try {
+    assigningSuppliers.value = true
+    error.value = null
+    successMessage.value = null
+    const updatedCount = await assignSuppliersByBrand()
+    successMessage.value = `${updatedCount} produit(s) mis à jour avec leur fournisseur.`
+    await loadProducts()
+  } catch (err) {
+    console.error('[products] Failed to assign suppliers by brand', err)
+    error.value = err instanceof Error ? err.message : 'Impossible d attribuer les fournisseurs aux produits.'
+  } finally {
+    assigningSuppliers.value = false
+  }
+}
+
 const loadProducts = async () => {
   try {
     loading.value = true
     error.value = null
     const productItems = await getProducts()
     products.value = productItems.map(mapProductToTableItem)
-    await loadCategories()
-    await loadBrands()
+    await Promise.all([loadCategories(), loadBrands(), loadSupplierNames()])
     if (!categories.value.length) {
       categories.value = productCategories.value
     }
@@ -531,4 +622,11 @@ onMounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.product-color-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+}
+</style>

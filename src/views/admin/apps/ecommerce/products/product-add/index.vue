@@ -80,6 +80,13 @@
                   <div class="mb-3">
                     <label for="size" class="form-label"> Taille / Contenance </label>
                     <BFormInput id="size" v-model="form.size" type="text" placeholder="Ex: 1L, 5kg" />
+                  </div>
+                </BCol>
+
+                <BCol lg="6">
+                  <div class="mb-3">
+                    <label for="weightKg" class="form-label"> Poids (kg) </label>
+                    <BFormInput id="weightKg" v-model.number="form.weightKg" type="number" min="0" step="0.01" placeholder="Ex: 5" />
                     <span v-if="transportSimulation.message" class="badge fs-xxs mt-2"
                       :class="transportSimulationBadgeClass">
                       {{ transportSimulation.message }}
@@ -348,6 +355,7 @@ const form = ref({
   color: '',
   condition: '',
   size: '',
+  weightKg: null as number | null,
   productUrl: '',
 })
 
@@ -361,7 +369,10 @@ const activeTaxRates = computed(() => taxRates.value.filter((taxRate) => taxRate
 const selectedTaxRate = computed(() => activeTaxRates.value.find((taxRate) => taxRate.id === selectedTaxRateId.value))
 const taxAmount = computed(() => Number((Number(form.value.price || 0) * Number(selectedTaxRate.value?.rate || 0) / 100).toFixed(2)))
 const priceTaxIncluded = computed(() => Number((Number(form.value.price || 0) + taxAmount.value).toFixed(2)))
-const parsedWeightKg = computed(() => parseWeightKg(form.value.size))
+const shippingWeightKg = computed(() => {
+  const weight = form.value.weightKg
+  return weight === null || !Number.isFinite(Number(weight)) || Number(weight) < 0 ? null : Number(weight)
+})
 const transportSimulation = computed(() => getTransportSimulation())
 const transportSimulationBadgeClass = computed(() => {
   if (transportSimulation.value.isError) return 'badge-soft-danger'
@@ -394,16 +405,6 @@ const generatedSku = computed(() => {
 const formatTaxRate = (rate: number) => `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(rate)} %`
 const formatAmount = (amount: number) => `${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount)}`
 
-const parseWeightKg = (value: string) => {
-  const match = value.trim().toLowerCase().replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilogramme|kilogrammes|g|gr|gramme|grammes)\b/)
-  if (!match) return null
-
-  const amount = Number(match[1])
-  if (!Number.isFinite(amount)) return null
-
-  return ['g', 'gr', 'gramme', 'grammes'].includes(match[2]) ? amount / 1000 : amount
-}
-
 const findRangePrice = (value: number, ranges: SupplierShippingRange[]) => {
   if (!Array.isArray(ranges)) return null
   return ranges.find((range) => value >= range.min && value <= range.max)?.price ?? null
@@ -425,9 +426,9 @@ const getTransportSimulation = () => {
     return { message: `Transport estimé : ${formatAmount(price)} selon le prix TTC actuel du produit.`, isError: false }
   }
 
-  const weight = parsedWeightKg.value
+  const weight = shippingWeightKg.value
   if (weight === null) {
-    return { message: 'Saisir un poids dans Taille / Contenance pour simuler le transport, ex : 500g ou 5kg.', isError: true }
+    return { message: 'Saisir un poids dans le champ Poids (kg) pour simuler le transport.', isError: true }
   }
 
   const price = findRangePrice(weight, shipping.ranges)
@@ -451,6 +452,7 @@ const resetForm = () => {
     color: '',
     condition: '',
     size: '',
+    weightKg: null,
     productUrl: '',
   }
   category.value = 'All'
@@ -549,6 +551,7 @@ const handleCreateProduct = async (published: boolean) => {
       color: form.value.color.trim() || undefined,
       condition: form.value.condition.trim() || undefined,
       size: form.value.size.trim() || undefined,
+      weightKg: form.value.weightKg ?? undefined,
       productUrl: form.value.productUrl.trim() || undefined,
       stock: Number(form.value.stock || 0),
       taxAmount: taxAmount.value,

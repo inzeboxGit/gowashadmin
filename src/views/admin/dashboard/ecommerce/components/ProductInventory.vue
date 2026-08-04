@@ -99,7 +99,7 @@ const totalRows = computed(() => products.value.length)
 const formatPrice = (value: number) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'Euro',
+    currency: 'EUR',
     maximumFractionDigits: 2,
   }).format(value)
 }

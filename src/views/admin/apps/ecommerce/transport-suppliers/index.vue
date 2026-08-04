@@ -63,6 +63,10 @@
             <span class="badge badge-soft-info fs-xxs">{{ item.typeLabel }}</span>
           </template>
 
+          <template #cell(shippingThreshold)="{ item }">
+            {{ formatAmount(item.shippingThreshold) }}
+          </template>
+
           <template #cell(pricing)="{ item }">
             <div class="d-flex flex-column gap-1">
               <span v-if="item.shipping.type === 'fixed'" class="fw-semibold text-dark">
@@ -85,6 +89,10 @@
               <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="openEditModal(item)">
                 <Icon icon="square-pen" class="fs-lg" />
               </BButton>
+              <BButton size="sm" class="btn-default btn-icon rounded-circle" aria-label="Supprimer"
+                :disabled="deletingId === item.id" @click="removeSupplier(item)">
+                <Icon icon="trash-2" class="fs-lg" />
+              </BButton>
             </div>
           </template>
         </BTable>
@@ -103,6 +111,13 @@
       <BCol md="12">
         <BFormGroup label="Nom du fournisseur" label-for="supplierName" label-class="form-label">
           <BFormInput id="supplierName" v-model="supplierForm.name" class="form-control" placeholder="Fournisseur B" required />
+        </BFormGroup>
+      </BCol>
+
+      <BCol md="6">
+        <BFormGroup label="Seuil de livraison (par défaut 0)" label-for="shippingThreshold" label-class="form-label">
+          <BFormInput id="shippingThreshold" v-model.number="supplierForm.shippingThreshold" type="number" min="0"
+            step="0.01" placeholder="0" />
         </BFormGroup>
       </BCol>
 
@@ -131,6 +146,7 @@
                 <th>{{ rangeMinLabel }}</th>
                 <th>{{ rangeMaxLabel }}</th>
                 <th>Prix transport</th>
+                <th class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -144,10 +160,21 @@
                 <td>
                   <BFormInput v-model.number="range.price" type="number" min="0" step="0.01" />
                 </td>
+                <td class="text-center">
+                  <BButton size="sm" variant="outline-danger" class="btn-icon"
+                    :disabled="supplierForm.ranges.length === 1" :aria-label="`Supprimer la tranche ${index + 1}`"
+                    @click="removeRange(index)">
+                    <Icon icon="minus" />
+                  </BButton>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
+        <BButton size="sm" variant="outline-primary" class="mt-2" @click="addRange">
+          <Icon icon="plus" class="me-1" />
+          Ajouter une tranche
+        </BButton>
       </BCol>
     </BRow>
   </BModal>
@@ -159,12 +186,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
-import { createSupplier, getSuppliers, updateSupplier } from '~/services/suppliers.service'
+import { createSupplier, deleteSupplier, getSuppliers, updateSupplier } from '~/services/suppliers.service'
 import type { Supplier, SupplierShipping, SupplierShippingRange, SupplierShippingType } from '~/types/supplier'
 
 type SupplierTableItem = {
   id: string
   name: string
+  shippingThreshold: number
   typeLabel: string
   shipping: SupplierShipping
   ranges: SupplierShippingRange[]
@@ -174,6 +202,7 @@ type SupplierTableItem = {
 
 const fields: Exclude<TableFieldRaw<SupplierTableItem>, string>[] = [
   { key: 'name', label: 'Fournisseur', sortable: true },
+  { key: 'shippingThreshold', label: 'Seuil de livraison', sortable: true },
   { key: 'type', label: 'Mode de calcul', sortable: true },
   { key: 'pricing', label: 'Tarifs', sortable: false },
   { key: 'updatedAt', label: 'Date de modification', sortable: true },
@@ -210,10 +239,12 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const showSupplierModal = ref(false)
 const supplierLoading = ref(false)
+const deletingId = ref<string | null>(null)
 const supplierError = ref<string | null>(null)
 const editingSupplierId = ref<string | null>(null)
 const supplierForm = ref({
   name: '',
+  shippingThreshold: 0,
   shippingType: 'fixed' as SupplierShippingType,
   fixedPrice: 8,
   ranges: defaultAmountRanges(),
@@ -272,6 +303,7 @@ const mapSupplierToTableItem = (supplier: Supplier): SupplierTableItem => {
   return {
     id: supplier.id,
     name: supplier.name,
+    shippingThreshold: supplier.shipping_threshold ?? 0,
     typeLabel: getShippingTypeLabel(shipping.type),
     shipping,
     ranges: shipping.type === 'fixed' ? [] : shipping.ranges || [],
@@ -297,6 +329,7 @@ const loadSuppliers = async () => {
 const resetSupplierForm = () => {
   supplierForm.value = {
     name: '',
+    shippingThreshold: 0,
     shippingType: 'fixed',
     fixedPrice: 8,
     ranges: defaultAmountRanges(),
@@ -314,6 +347,7 @@ const openEditModal = (item: SupplierTableItem) => {
   editingSupplierId.value = item.id
   supplierForm.value = {
     name: item.name,
+    shippingThreshold: item.shippingThreshold,
     shippingType: item.shipping.type,
     fixedPrice: item.shipping.type === 'fixed' ? item.shipping.price : 8,
     ranges: item.shipping.type === 'fixed' ? defaultAmountRanges() : item.shipping.ranges.map((range) => ({ ...range })),
@@ -322,8 +356,40 @@ const openEditModal = (item: SupplierTableItem) => {
   showSupplierModal.value = true
 }
 
+const addRange = () => {
+  const lastRange = supplierForm.value.ranges.at(-1)
+  const min = lastRange ? Number(lastRange.max) : 0
+
+  supplierForm.value.ranges.push({
+    min: Number.isFinite(min) ? min : 0,
+    max: Number.isFinite(min) ? min + 1 : 1,
+    price: lastRange ? Number(lastRange.price) || 0 : 0,
+  })
+}
+
+const removeRange = (index: number) => {
+  if (supplierForm.value.ranges.length === 1) return
+  supplierForm.value.ranges.splice(index, 1)
+}
+
+const removeSupplier = async (item: SupplierTableItem) => {
+  if (!window.confirm(`Supprimer le fournisseur « ${item.name} » ?`)) return
+
+  try {
+    deletingId.value = item.id
+    error.value = null
+    await deleteSupplier(item.id)
+    suppliers.value = suppliers.value.filter((supplier) => supplier.id !== item.id)
+  } catch (err) {
+    console.error('[suppliers] Failed to delete supplier', err)
+    error.value = err instanceof Error ? err.message : 'Impossible de supprimer le fournisseur.'
+  } finally {
+    deletingId.value = null
+  }
+}
+
 const validateRanges = (ranges: SupplierShippingRange[]) => {
-  if (ranges.length !== 3) return 'Les 3 tranches de tarifs sont obligatoires.'
+  if (!ranges.length) return 'Ajoutez au moins une tranche de tarifs.'
 
   for (const range of ranges) {
     if (range.min < 0 || range.max <= range.min || range.price < 0) {
@@ -371,9 +437,15 @@ const handleSubmitSupplier = async (event: Event) => {
     supplierError.value = null
 
     const name = supplierForm.value.name.trim()
+    const shippingThreshold = Number(supplierForm.value.shippingThreshold) || 0
 
     if (!name) {
       supplierError.value = 'Le nom du fournisseur est obligatoire.'
+      return
+    }
+
+    if (!Number.isFinite(shippingThreshold) || shippingThreshold < 0) {
+      supplierError.value = 'Le seuil de livraison doit etre superieur ou egal a 0.'
       return
     }
 
@@ -381,9 +453,9 @@ const handleSubmitSupplier = async (event: Event) => {
     if (!shipping) return
 
     if (editingSupplierId.value) {
-      await updateSupplier({ id: editingSupplierId.value, name, shipping })
+      await updateSupplier({ id: editingSupplierId.value, name, shipping_threshold: shippingThreshold, shipping })
     } else {
-      await createSupplier({ name, shipping })
+      await createSupplier({ name, shipping_threshold: shippingThreshold, shipping })
     }
 
     resetSupplierForm()

@@ -5,6 +5,23 @@
         <BCarouselSlide v-for="(image, index) in productImages" :key="image" :img-src="image" class="text-center bg-transparent" />
       </BCarousel>
 
+      <div v-if="galleryImages.length" class="px-3 pt-3">
+        <p class="text-muted text-uppercase fs-xxs mb-2">Galerie photos</p>
+        <div class="d-flex flex-wrap gap-2">
+          <button
+            v-for="image in galleryImages"
+            :key="image"
+            type="button"
+            class="border rounded p-0 bg-transparent"
+            :class="{ 'border-primary border-2': productImages[activeSlide] === image }"
+            :aria-label="'Afficher la photo de galerie'"
+            @click="activeSlide = productImages.indexOf(image)"
+          >
+            <img :src="image" alt="Photo de galerie" class="rounded" style="width: 64px; height: 64px; object-fit: cover;" />
+          </button>
+        </div>
+      </div>
+
       <div class="text-center my-3">
         <BButton variant="light" class="me-1" @click="router.push(`/apps/ecommerce/product-edit/${product.id}`)">
           <Icon icon="pencil" class="fs-lg me-1" /> Modifier
@@ -28,7 +45,8 @@ import type { Product } from '~/types/product'
 import Icon from '~/components/wrappers/Icon.vue'
 
 const props = defineProps<{ product: Product }>()
-const productImages = computed(() => [props.product.imageUrl, ...(props.product.galleryUrls || [])].filter(Boolean))
+const galleryImages = computed(() => (props.product.galleryUrls || []).filter(Boolean))
+const productImages = computed(() => [props.product.imageUrl, ...galleryImages.value].filter(Boolean))
 const emit = defineEmits<{ (e: 'updated'): void }>()
 
 const router = useRouter()

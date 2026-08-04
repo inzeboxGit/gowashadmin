@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '~/lib/firebase/firestore'
 import type { Supplier, SupplierShipping } from '~/types/supplier'
 
@@ -6,6 +6,7 @@ const SUPPLIERS_COLLECTION = 'suppliers'
 
 export type SaveSupplierInput = {
   name: string
+  shipping_threshold: number
   shipping: SupplierShipping
 }
 
@@ -45,6 +46,7 @@ export const createSupplier = async (input: SaveSupplierInput) => {
   const payload: Supplier = {
     id: supplierRef.id,
     name: input.name,
+    shipping_threshold: input.shipping_threshold,
     shipping: input.shipping,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -60,6 +62,7 @@ export const updateSupplier = async (input: UpdateSupplierInput) => {
 
   const payload: Partial<Supplier> = {
     name: input.name,
+    shipping_threshold: input.shipping_threshold,
     shipping: input.shipping,
     updatedAt: serverTimestamp(),
   }
@@ -70,4 +73,8 @@ export const updateSupplier = async (input: UpdateSupplierInput) => {
     id: input.id,
     ...payload,
   }
+}
+
+export const deleteSupplier = async (id: string) => {
+  await deleteDoc(doc(db, SUPPLIERS_COLLECTION, id))
 }

@@ -42,13 +42,20 @@
       <h6 class="mb-1 text-muted text-uppercase">Marque :</h6>
       <p class="fw-medium mb-0">{{ product.brandName }}</p>
     </BCol>
+    <BCol md="4" xl="3">
+      <h6 class="mb-1 text-muted text-uppercase">Fournisseur :</h6>
+      <p class="fw-medium mb-0">{{ supplierName || '—' }}</p>
+    </BCol>
     <BCol v-if="product.condition" md="4" xl="3">
       <h6 class="mb-1 text-muted text-uppercase">État :</h6>
       <p class="fw-medium mb-0">{{ product.condition }}</p>
     </BCol>
     <BCol v-if="product.color" md="4" xl="3">
       <h6 class="mb-1 text-muted text-uppercase">Couleur :</h6>
-      <p class="fw-medium mb-0">{{ product.color }}</p>
+      <p class="fw-medium mb-0 d-flex align-items-center gap-2">
+        <span class="color-swatch" :style="{ backgroundColor: product.color }" />
+        {{ product.color }}
+      </p>
     </BCol>
     <BCol v-if="product.size" md="4" xl="3">
       <h6 class="mb-1 text-muted text-uppercase">Taille :</h6>
@@ -63,17 +70,47 @@
   </h3>
 
   <h5 class="text-uppercase text-muted fs-xs mb-2">Description :</h5>
-  <p>{{ product.description }}</p>
+  <div v-if="product.description" class="product-description" v-html="formattedDescription" />
+  <p v-else class="text-muted">Aucune description.</p>
 
   <a v-if="product.productUrl" :href="product.productUrl" target="_blank" rel="noopener noreferrer" class="link-primary fw-semibold">Voir sur le site...</a>
 </template>
 
 <script setup lang="ts">
 import { BCol, BRow } from 'bootstrap-vue-next'
+import { computed } from 'vue'
 import type { Product } from '~/types/product'
 import Icon from '~/components/wrappers/Icon.vue'
 
-defineProps<{ product: Product }>()
+const props = defineProps<{ product: Product, supplierName?: string }>()
+
+const formattedDescription = computed(() => {
+  const document = new DOMParser().parseFromString(props.product.description || '', 'text/html')
+
+  document.querySelectorAll('script, style, iframe, object, embed, link, meta').forEach((element) => element.remove())
+  document.querySelectorAll('*').forEach((element) => {
+    for (const attribute of Array.from(element.attributes)) {
+      const name = attribute.name.toLowerCase()
+      const value = attribute.value.trim().toLowerCase()
+      const isUnsafeUrl = ['href', 'src', 'xlink:href'].includes(name) && (value.startsWith('javascript:') || value.startsWith('data:text/html'))
+
+      if (name.startsWith('on') || isUnsafeUrl) element.removeAttribute(attribute.name)
+    }
+  })
+
+  return document.body.innerHTML
+})
 </script>
 
-<style scoped></style>
+<style scoped>
+.product-description :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.color-swatch {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+}
+</style>
