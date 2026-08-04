@@ -2,6 +2,10 @@
 <template>
   <PageBreadcrumb title="Marques" subtitle="Ecommerce" />
 
+  <BAlert v-if="successMessage" variant="success" dismissible show class="mb-3" @closed="successMessage = null">
+    {{ successMessage }}
+  </BAlert>
+
   <BRow>
     <BCol xs="12">
       <BCard no-body>
@@ -12,7 +16,10 @@
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
-            <BButton v-if="selected.length" variant="danger" @click="handleDeleteSelected"> Delete </BButton>
+            <BButton v-if="selected.length" variant="danger" :disabled="deletingSelected" @click="handleDeleteSelected">
+              <BSpinner v-if="deletingSelected" small class="me-1" />
+              Supprimer
+            </BButton>
           </div>
 
           <div class="d-flex align-items-center gap-1">
@@ -97,8 +104,9 @@
               <BButton size="sm" class="btn-default btn-icon rounded-circle">
                 <Icon icon="square-pen" class="fs-lg" @click="openEditBrandModal(item)" />
               </BButton>
-              <BButton size="sm" class="btn-default btn-icon rounded-circle">
-                <Icon icon="trash-2" class="fs-lg" @click="handleDeleteItem(item)" />
+              <BButton size="sm" class="btn-default btn-icon rounded-circle" aria-label="Supprimer" :disabled="deletingId === item.id" @click="handleDeleteItem(item)">
+                <BSpinner v-if="deletingId === item.id" small />
+                <Icon v-else icon="trash-2" class="fs-lg" />
               </BButton>
             </div>
           </template>
@@ -165,7 +173,7 @@ import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
-import { createBrand, getBrands, updateBrand } from '~/services/brands.service'
+import { createBrand, deleteBrand, deleteBrands, getBrands, updateBrand } from '~/services/brands.service'
 import type { Brand } from '~/types/brand'
 
 type BrandTableItem = {
@@ -196,7 +204,10 @@ const perPage = ref(8)
 const totalRows = ref(0)
 const brands = ref<BrandTableItem[]>([])
 const loading = ref(false)
+const deletingId = ref<string | null>(null)
+const deletingSelected = ref(false)
 const error = ref<string | null>(null)
+const successMessage = ref<string | null>(null)
 const showBrandModal = ref(false)
 const brandLoading = ref(false)
 const brandError = ref<string | null>(null)
@@ -366,16 +377,43 @@ function adjustPage() {
   if (currentPage.value > totalPages) currentPage.value = totalPages || 1
 }
 
-function handleDeleteItem(item: BrandTableItem) {
-  deleteItem(item)
-  totalRows.value = filteredBrands.value.length
-  adjustPage()
+const handleDeleteItem = async (item: BrandTableItem) => {
+  if (!window.confirm(`Supprimer définitivement la marque « ${item.name} » ?`)) return
+
+  try {
+    deletingId.value = item.id
+    error.value = null
+    await deleteBrand(item.id)
+    deleteItem(item)
+    successMessage.value = 'Marque supprimée définitivement.'
+    totalRows.value = filteredBrands.value.length
+    adjustPage()
+  } catch (err) {
+    console.error('[brands] Failed to delete brand', err)
+    error.value = err instanceof Error ? err.message : 'Impossible de supprimer la marque.'
+  } finally {
+    deletingId.value = null
+  }
 }
 
-function handleDeleteSelected() {
-  deleteSelected()
-  totalRows.value = filteredBrands.value.length
-  adjustPage()
+const handleDeleteSelected = async () => {
+  const items = [...selected.value]
+  if (!items.length || !window.confirm(`Supprimer définitivement les ${items.length} marque(s) sélectionnée(s) ?`)) return
+
+  try {
+    deletingSelected.value = true
+    error.value = null
+    await deleteBrands(items.map((item) => item.id))
+    deleteSelected()
+    successMessage.value = `${items.length} marque(s) supprimée(s) définitivement.`
+    totalRows.value = filteredBrands.value.length
+    adjustPage()
+  } catch (err) {
+    console.error('[brands] Failed to delete selected brands', err)
+    error.value = err instanceof Error ? err.message : 'Impossible de supprimer les marques sélectionnées.'
+  } finally {
+    deletingSelected.value = false
+  }
 }
 
 const { selected, toggleSelectAll, onToggleRow, deleteSelected, deleteItem, allSelected, isIndeterminate } = useTableActions(brands)

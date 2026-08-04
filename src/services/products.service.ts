@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc, writeBatch } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc, writeBatch } from 'firebase/firestore'
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { db } from '~/lib/firebase/firestore'
 import { storage } from '~/lib/firebase/storage'
@@ -157,6 +157,20 @@ export const updateProduct = async (id: string, input: UpdateProductInput) => {
 
 export const setProductPublished = async (id: string, published: boolean) => {
   await updateDoc(doc(db, PRODUCTS_COLLECTION, id), { published, updatedAt: new Date().toISOString() })
+}
+
+export const deleteProduct = async (id: string) => {
+  await deleteDoc(doc(db, PRODUCTS_COLLECTION, id))
+}
+
+export const deleteProducts = async (ids: string[]) => {
+  const BATCH_SIZE = 500
+
+  for (let index = 0; index < ids.length; index += BATCH_SIZE) {
+    const batch = writeBatch(db)
+    for (const id of ids.slice(index, index + BATCH_SIZE)) batch.delete(doc(db, PRODUCTS_COLLECTION, id))
+    await batch.commit()
+  }
 }
 
 export const assignSuppliersByBrand = async () => {

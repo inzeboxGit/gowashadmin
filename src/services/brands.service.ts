@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc, updateDoc, writeBatch } from 'firebase/firestore'
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { db } from '~/lib/firebase/firestore'
 import { storage } from '~/lib/firebase/storage'
@@ -95,5 +95,19 @@ export const updateBrand = async (input: UpdateBrandInput) => {
   return {
     id: input.id,
     ...payload,
+  }
+}
+
+export const deleteBrand = async (id: string) => {
+  await deleteDoc(doc(db, BRANDS_COLLECTION, id))
+}
+
+export const deleteBrands = async (ids: string[]) => {
+  const BATCH_SIZE = 500
+
+  for (let index = 0; index < ids.length; index += BATCH_SIZE) {
+    const batch = writeBatch(db)
+    for (const id of ids.slice(index, index + BATCH_SIZE)) batch.delete(doc(db, BRANDS_COLLECTION, id))
+    await batch.commit()
   }
 }

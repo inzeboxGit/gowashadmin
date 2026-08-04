@@ -1,0 +1,4 @@
+git add.
+git commit -m "mofis"
+git push
+npx vercel --prod --yes --scope darafital-gmailcoms-projects

@@ -23,7 +23,10 @@
               <Icon icon="search" class="app-search-icon text-muted" />
             </div>
 
-            <BButton v-if="selected.length" variant="danger" @click="handleDeleteSelected"> Supprimer </BButton>
+            <BButton v-if="selected.length" variant="danger" :disabled="deletingSelected" @click="handleDeleteSelected">
+              <BSpinner v-if="deletingSelected" small class="me-1" />
+              Supprimer
+            </BButton>
           </div>
 
           <div class="d-flex align-items-center gap-2">
@@ -190,8 +193,9 @@
               <BButton size="sm" class="btn-default btn-icon rounded-circle" @click="router.push(`/apps/ecommerce/product-edit/${item.id}`)">
                 <Icon icon="square-pen" class="fs-lg" />
               </BButton>
-              <BButton size="sm" class="btn-default btn-icon rounded-circle">
-                <Icon icon="trash-2" class="fs-lg" @click="handleDeleteItem(item)" />
+              <BButton size="sm" class="btn-default btn-icon rounded-circle" aria-label="Supprimer" :disabled="deletingId === item.id" @click="handleDeleteItem(item)">
+                <BSpinner v-if="deletingId === item.id" small />
+                <Icon v-else icon="trash-2" class="fs-lg" />
               </BButton>
             </div>
           </template>
@@ -218,7 +222,7 @@ import Icon from '~/components/wrappers/Icon.vue'
 import { useTableActions } from '~/composables/useTableActions'
 import { getBrands } from '~/services/brands.service'
 import { getCategories } from '~/services/categories.service'
-import { assignSuppliersByBrand, bulkImportProducts, getProducts } from '~/services/products.service'
+import { assignSuppliersByBrand, bulkImportProducts, deleteProduct, deleteProducts, getProducts } from '~/services/products.service'
 import { getSuppliers } from '~/services/suppliers.service'
 import { toPascalCase } from '~/utils/helpers'
 import type { Product } from '~/types/product'
@@ -285,6 +289,8 @@ const loading = ref(false)
 const importing = ref(false)
 const exporting = ref(false)
 const assigningSuppliers = ref(false)
+const deletingId = ref<string | null>(null)
+const deletingSelected = ref(false)
 const csvInput = ref<HTMLInputElement | null>(null)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
@@ -591,16 +597,43 @@ function adjustPage() {
   }
 }
 
-function handleDeleteItem(item: ProductTableItem) {
-  deleteItem(item)
-  totalRows.value = filteredProducts.value.length
-  adjustPage()
+const handleDeleteItem = async (item: ProductTableItem) => {
+  if (!window.confirm(`Supprimer définitivement le produit « ${item.name} » ?`)) return
+
+  try {
+    deletingId.value = item.id
+    error.value = null
+    await deleteProduct(item.id)
+    deleteItem(item)
+    successMessage.value = 'Produit supprimé définitivement.'
+    totalRows.value = filteredProducts.value.length
+    adjustPage()
+  } catch (err) {
+    console.error('[products] Failed to delete product', err)
+    error.value = err instanceof Error ? err.message : 'Impossible de supprimer le produit.'
+  } finally {
+    deletingId.value = null
+  }
 }
 
-function handleDeleteSelected() {
-  deleteSelected()
-  totalRows.value = filteredProducts.value.length
-  adjustPage()
+const handleDeleteSelected = async () => {
+  const items = [...selected.value]
+  if (!items.length || !window.confirm(`Supprimer définitivement les ${items.length} produit(s) sélectionné(s) ?`)) return
+
+  try {
+    deletingSelected.value = true
+    error.value = null
+    await deleteProducts(items.map((item) => item.id))
+    deleteSelected()
+    successMessage.value = `${items.length} produit(s) supprimé(s) définitivement.`
+    totalRows.value = filteredProducts.value.length
+    adjustPage()
+  } catch (err) {
+    console.error('[products] Failed to delete selected products', err)
+    error.value = err instanceof Error ? err.message : 'Impossible de supprimer les produits sélectionnés.'
+  } finally {
+    deletingSelected.value = false
+  }
 }
 
 const { selected, toggleSelectAll, onToggleRow, deleteSelected, deleteItem, allSelected, isIndeterminate } = useTableActions(products)
