@@ -24,6 +24,12 @@ export const menuItems: MenuItemType[] = [
           // },
         ],
       },
+      {
+        'url': '/settings',
+        'slug': 'pages:settings',
+        'label': 'Parametres',
+        'icon': 'settings-2',
+      },
       // {
       //   'url': '/landing',
       //   'icon': 'rocket',

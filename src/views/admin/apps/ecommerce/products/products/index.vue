@@ -73,6 +73,11 @@
             <div>
               <BFormSelect v-model="perPage" :options="perPageOptions" class="form-control my-1 my-md-0" />
             </div>
+
+            <BButton variant="light" class="my-1 my-md-0" @click="resetFilters">
+              <Icon icon="x" class="fs-sm me-1" />
+              Effacer les filtres
+            </BButton>
           </div>
 
           <div class="d-flex gap-1">
@@ -310,6 +315,22 @@ const productsWithoutSupplierCount = computed(() => products.value.filter((produ
 
 const normalizeBrandForFilter = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '_')
 
+// Les anciennes données peuvent utiliser « Lavage », « Lavages » ou des variantes
+// de casse. Le filtre les considère comme une même catégorie.
+const normalizeCategoryForFilter = (value: string) => value
+  .trim()
+  .toLocaleLowerCase('fr-FR')
+  .replace(/s$/, '')
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  category.value = 'All'
+  brand.value = 'All'
+  status.value = 'All'
+  priceRange.value = 'All'
+  currentPage.value = 1
+}
+
 const loadCategories = async () => {
   try {
     const firestoreCategories = await getCategories()
@@ -357,7 +378,8 @@ const filteredProducts = computed(() => {
       product.category.toLowerCase().includes(normalizedSearch) ||
       product.id.toLowerCase().includes(normalizedSearch)
 
-    const matchesCategory = category.value === 'All' || product.category === category.value
+    const matchesCategory = category.value === 'All' ||
+      normalizeCategoryForFilter(product.category) === normalizeCategoryForFilter(category.value)
     const matchesBrand = brand.value === 'All' || normalizeBrandForFilter(product.brand) === normalizeBrandForFilter(brand.value)
     const matchesStatus = status.value === 'All' || toPascalCase(product.status) === status.value
     const matchesPriceRange =

@@ -501,6 +501,12 @@ export const allRoutes = [
             component: () => import('~/views/admin/dashboard/ecommerce/index.vue')
         },
         {
+            path: '/settings',
+            name: 'settings',
+            meta: { title: 'Parametres' },
+            component: () => import('~/views/admin/settings/index.vue')
+        },
+        {
             path: '/dashboard/projects',
             name: 'dashboard.projects',
             meta: { title: 'Projects' },

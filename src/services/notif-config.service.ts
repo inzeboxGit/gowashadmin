@@ -1,4 +1,5 @@
 import type { OneSignalNotifConfig } from '~/types/notif-config'
+import { getNotificationSettings } from './settings.service'
 
 const DEFAULT_ONESIGNAL_CONFIG = {
   oneSignalBaseUrl: 'https://api.onesignal.com/notifications?c=push',
@@ -23,6 +24,8 @@ const CLIENT_NOTIF_CONFIG: OneSignalNotifConfig = {
 
 const isConfigured = (config: OneSignalNotifConfig) => {
   return (
+    config.oneSignalAppId.trim().length > 0 &&
+    config.oneSignalApiKey.trim().length > 0 &&
     !config.oneSignalAppId.startsWith('APP_ID_') &&
     !config.oneSignalApiKey.startsWith('SECRET_KEY_')
   )
@@ -33,7 +36,8 @@ const isConfigured = (config: OneSignalNotifConfig) => {
  * Remplacer APP_ID_CLIENT et SECRET_KEY_CLIENT par les vraies valeurs.
  */
 export const getClientNotifConfig = async (): Promise<OneSignalNotifConfig | null> => {
-  return isConfigured(CLIENT_NOTIF_CONFIG) ? CLIENT_NOTIF_CONFIG : null
+  const config = await getNotificationSettings('client', CLIENT_NOTIF_CONFIG)
+  return isConfigured(config) ? config : null
 }
 
 /**
@@ -41,7 +45,8 @@ export const getClientNotifConfig = async (): Promise<OneSignalNotifConfig | nul
  * Remplacer APP_ID_PRO et SECRET_KEY_PRO par les vraies valeurs.
  */
 export const getProNotifConfig = async (): Promise<OneSignalNotifConfig | null> => {
-  return isConfigured(PRO_NOTIF_CONFIG) ? PRO_NOTIF_CONFIG : null
+  const config = await getNotificationSettings('pro', PRO_NOTIF_CONFIG)
+  return isConfigured(config) ? config : null
 }
 
 export const getNotifConfigByAudience = async (
