@@ -203,7 +203,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import TablePagination from '~/components/TablePagination.vue'
 import Icon from '~/components/wrappers/Icon.vue'
-import { getPurchases } from '~/services/purchases.service'
+import { getExistingPaymentIds, getPurchases } from '~/services/purchases.service'
 import type { FirestoreDateValue, Purchase, PurchaseItem } from '~/types/purchase'
 
 type PurchaseTableItem = {
@@ -219,6 +219,9 @@ type PurchaseTableItem = {
   productsAmount: number
   shippingAmount: number
   status: string
+  paymentStatus: string
+  purchaseStatus: string
+  paymentId: string
   invoiceNumber: string
   invoiceUrl: string
   currency: string
@@ -235,6 +238,7 @@ const fields: Exclude<TableFieldRaw<PurchaseTableItem>, string>[] = [
 ]
 
 const purchases = ref<PurchaseTableItem[]>([])
+const existingPaymentIds = ref<Set<string>>(new Set())
 const loading = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
@@ -307,6 +311,9 @@ const mapPurchaseToTableItem = (purchase: Purchase): PurchaseTableItem => {
     productsAmount: purchase.productsAmount || 0,
     shippingAmount: purchase.shippingAmount || 0,
     status: purchase.paymentStatus || purchase.status || '-',
+    paymentStatus: purchase.paymentStatus || '-',
+    purchaseStatus: purchase.status || '-',
+    paymentId: purchase.paymentId || '',
     invoiceNumber: purchase.invoiceNumber || purchase.factureNumber || purchase.invoiceSnapshot?.invoiceNumber || '-',
     invoiceUrl: purchase.invoiceUrl || purchase.factureUrl || '',
     currency: purchase.currency || 'EUR',
@@ -332,10 +339,18 @@ const filteredPurchases = computed(() => {
   })
 })
 
-const paidPurchasesCount = computed(() => purchases.value.filter((purchase) => purchase.status.toLowerCase() === 'paid').length)
-const totalAmount = computed(() => purchases.value.reduce((sum, purchase) => sum + purchase.amount, 0))
-const totalShipping = computed(() => purchases.value.reduce((sum, purchase) => sum + purchase.shippingAmount, 0))
-const soldItemsCount = computed(() => purchases.value.reduce((sum, purchase) => {
+const isValidPaidPurchase = (purchase: PurchaseTableItem) => {
+  return purchase.paymentStatus.toLowerCase() === 'paid'
+    && purchase.purchaseStatus.toLowerCase() === 'paid'
+    && Boolean(purchase.paymentId)
+    && existingPaymentIds.value.has(purchase.paymentId)
+}
+
+const paidPurchases = computed(() => purchases.value.filter(isValidPaidPurchase))
+const paidPurchasesCount = computed(() => paidPurchases.value.length)
+const totalAmount = computed(() => paidPurchases.value.reduce((sum, purchase) => sum + purchase.amount, 0))
+const totalShipping = computed(() => paidPurchases.value.reduce((sum, purchase) => sum + purchase.shippingAmount, 0))
+const soldItemsCount = computed(() => paidPurchases.value.reduce((sum, purchase) => {
   return sum + purchase.products.reduce((itemSum, product) => itemSum + (product.quantity || 0), 0)
 }, 0))
 
@@ -345,6 +360,7 @@ const loadPurchases = async () => {
 
   try {
     const purchaseItems = await getPurchases()
+    existingPaymentIds.value = await getExistingPaymentIds(purchaseItems.map((purchase) => purchase.paymentId || ''))
     purchases.value = purchaseItems.map(mapPurchaseToTableItem)
   } catch (err) {
     console.error('[purchases] Failed to load purchases', err)

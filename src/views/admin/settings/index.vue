@@ -33,6 +33,16 @@
             <BFormGroup label="Texte de la banniere" label-for="banner-text">
               <BFormTextarea id="banner-text" v-model="bannerText" rows="3" />
             </BFormGroup>
+            <BFormGroup label="Image de bannière" label-for="shop-offer-background-image" class="mt-3">
+              <BFormFile id="shop-offer-background-image" v-model="shopOfferBackgroundImageFile" class="form-control" accept="image/*" />
+              <BAlert v-if="shopOfferBackgroundImageFile && shopOfferBackgroundImageUrl" variant="info" show class="mt-3 mb-0">
+                L’image actuelle sera remplacée après sauvegarde.
+              </BAlert>
+              <div v-if="shopOfferBackgroundImageUrl" class="mt-3">
+                <img :src="shopOfferBackgroundImageUrl" alt="Image de bannière" class="banner-image-preview" />
+                <p class="text-muted fs-xs mb-0 mt-2 text-break">{{ shopOfferBackgroundImageUrl }}</p>
+              </div>
+            </BFormGroup>
             <div class="mt-4 text-end">
               <BButton variant="primary" :disabled="isLoading || savingSection !== null" @click="saveTab('banner')">
                 <Icon icon="save" class="me-1" />
@@ -244,7 +254,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BAlert, BButton, BCard, BCardBody, BCardHeader, BCol, BFormCheckbox, BFormGroup, BFormInput, BFormTextarea, BRow, BSpinner, BTab, BTabs } from 'bootstrap-vue-next'
+import { BAlert, BButton, BCard, BCardBody, BCardHeader, BCol, BFormCheckbox, BFormFile, BFormGroup, BFormInput, BFormTextarea, BRow, BSpinner, BTab, BTabs } from 'bootstrap-vue-next'
 import Icon from '~/components/wrappers/Icon.vue'
 import PageBreadcrumb from '~/components/PageBreadcrumb.vue'
 import NotificationFields from './NotificationFields.vue'
@@ -260,6 +270,8 @@ const notificationDefaults = (appId: string): OneSignalNotifConfig => ({ oneSign
 type SectionKey = 'banner' | 'versioning' | 'proNotif' | 'clientNotif' | 'gowash'
 
 const bannerText = ref('10% de remise immediate pour tout parrainage')
+const shopOfferBackgroundImageUrl = ref('')
+const shopOfferBackgroundImageFile = ref<File | null>(null)
 const versioning = ref({ ...versioningDefaults })
 const gowash = ref({ ...gowashDefaults })
 const proNotifications = ref(notificationDefaults('c24ebb53-259b-487f-a8d6-62c3f8637c89'))
@@ -274,8 +286,9 @@ const loadSettings = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const [banner, savedVersioning, savedGowash, pro, client] = await Promise.all([getBannerSettings({ bannerText: bannerText.value }), getVersioningSettings(versioningDefaults), getGoWashSettings(gowashDefaults), getNotificationSettings('pro', proNotifications.value), getNotificationSettings('client', clientNotifications.value)])
+    const [banner, savedVersioning, savedGowash, pro, client] = await Promise.all([getBannerSettings({ bannerText: bannerText.value, shopOfferBackgroundImageUrl: shopOfferBackgroundImageUrl.value }), getVersioningSettings(versioningDefaults), getGoWashSettings(gowashDefaults), getNotificationSettings('pro', proNotifications.value), getNotificationSettings('client', clientNotifications.value)])
     bannerText.value = banner.bannerText
+    shopOfferBackgroundImageUrl.value = banner.shopOfferBackgroundImageUrl || ''
     versioning.value = savedVersioning
     gowash.value = savedGowash
     proNotifications.value = pro
@@ -291,7 +304,13 @@ const saveTab = async (section: SectionKey) => {
   errorMessage.value = ''
   try {
     if (section === 'banner') {
-      await saveBannerSettings({ bannerText: bannerText.value })
+      const savedBanner = await saveBannerSettings({
+        bannerText: bannerText.value,
+        shopOfferBackgroundImageUrl: shopOfferBackgroundImageUrl.value,
+        shopOfferBackgroundImageFile: shopOfferBackgroundImageFile.value,
+      })
+      shopOfferBackgroundImageUrl.value = savedBanner.shopOfferBackgroundImageUrl || ''
+      shopOfferBackgroundImageFile.value = null
       successMessage.value = 'Les parametres de la banniere ont ete sauvegardes.'
     } else if (section === 'versioning') {
       await saveVersioningSettings(versioning.value)
@@ -333,6 +352,13 @@ onMounted(loadSettings)
 
 .form-section {
   max-width: 980px;
+}
+
+.banner-image-preview {
+  border-radius: 8px;
+  max-height: 180px;
+  max-width: 100%;
+  object-fit: cover;
 }
 
 .section-heading {

@@ -114,5 +114,6 @@ export interface AppPanelConfig {
 export interface AppConfigDocument {
   delaiAttente?: number
   panelconfig?: AppPanelConfig
+  shopOfferBackgroundImageUrl?: string
   texts?: AppTextsConfig
 }

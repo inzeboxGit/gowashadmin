@@ -1,5 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { deleteObject, getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { db } from '~/lib/firebase/firestore'
+import { storage } from '~/lib/firebase/storage'
 import type { OneSignalNotifConfig } from '~/types/notif-config'
 import type { AppConfigDocument, AppTextsConfig } from '~/types/app-config'
 
@@ -7,6 +9,15 @@ const SETTINGS_COLLECTION = 'appSettings'
 const NOTIFICATION_COLLECTION = 'notificationConfigs'
 const APP_CONFIGS_COLLECTION = 'appConfigs'
 const APPS_DOC = 'apps'
+
+type BannerSettings = {
+  bannerText: string
+  shopOfferBackgroundImageUrl?: string
+}
+
+export type SaveBannerSettingsInput = BannerSettings & {
+  shopOfferBackgroundImageFile?: File | null
+}
 
 export const defaultAppTexts: AppTextsConfig = {
   aboutLabel: "À propos",
@@ -153,27 +164,63 @@ const saveConfig = async <T extends object>(collectionName: string, documentId: 
   await setDoc(doc(db, collectionName, documentId), { ...payload, updatedAt: serverTimestamp() }, { merge: true })
 }
 
-export const getBannerSettings = async (defaults: { bannerText: string }): Promise<{ bannerText: string }> => {
+const uploadShopOfferBackgroundImage = async (imageFile?: File | null) => {
+  if (!imageFile) return ''
+
+  const extension = imageFile.name.split('.').pop()
+  const filename = `${Date.now()}${extension ? `.${extension}` : ''}`
+  const imageRef = storageRef(storage, `appConfigs/${APPS_DOC}/shopOfferBackgroundImage/${filename}`)
+
+  await uploadBytes(imageRef, imageFile)
+
+  return getDownloadURL(imageRef)
+}
+
+const deleteStorageFileFromUrl = async (fileUrl?: string) => {
+  if (!fileUrl) return
+
+  try {
+    await deleteObject(storageRef(storage, fileUrl))
+  } catch (error) {
+    console.warn('[settings] Failed to delete previous banner image', error)
+  }
+}
+
+export const getBannerSettings = async (defaults: BannerSettings): Promise<BannerSettings> => {
   const snapshot = await getDoc(doc(db, APP_CONFIGS_COLLECTION, APPS_DOC))
   if (snapshot.exists()) {
     const data = snapshot.data() as AppConfigDocument
-    if (data.texts?.bannerText !== undefined) {
-      return { bannerText: data.texts.bannerText }
+    return {
+      bannerText: data.texts?.bannerText ?? defaults.bannerText,
+      shopOfferBackgroundImageUrl: data.shopOfferBackgroundImageUrl ?? defaults.shopOfferBackgroundImageUrl ?? '',
     }
   }
   return defaults
 }
 
-export const saveBannerSettings = async (payload: { bannerText: string }) => {
+export const saveBannerSettings = async (payload: SaveBannerSettingsInput) => {
+  const uploadedImageUrl = await uploadShopOfferBackgroundImage(payload.shopOfferBackgroundImageFile)
+  const shopOfferBackgroundImageUrl = uploadedImageUrl || payload.shopOfferBackgroundImageUrl || ''
+
   await setDoc(
     doc(db, APP_CONFIGS_COLLECTION, APPS_DOC),
     {
+      shopOfferBackgroundImageUrl,
       texts: {
         bannerText: payload.bannerText,
       },
     },
     { merge: true }
   )
+
+  if (uploadedImageUrl && payload.shopOfferBackgroundImageUrl && payload.shopOfferBackgroundImageUrl !== uploadedImageUrl) {
+    await deleteStorageFileFromUrl(payload.shopOfferBackgroundImageUrl)
+  }
+
+  return {
+    bannerText: payload.bannerText,
+    shopOfferBackgroundImageUrl,
+  }
 }
 
 export const getAllAppTexts = async (): Promise<AppTextsConfig> => {
@@ -214,5 +261,3 @@ export const saveGoWashSettings = (payload: GoWashConfig) => saveConfig(SETTINGS
 
 export const getNotificationSettings = (audience: 'pro' | 'client', defaults: OneSignalNotifConfig) => getConfig(NOTIFICATION_COLLECTION, audience, defaults)
 export const saveNotificationSettings = (audience: 'pro' | 'client', payload: OneSignalNotifConfig) => saveConfig(NOTIFICATION_COLLECTION, audience, payload)
-
-
