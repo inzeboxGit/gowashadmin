@@ -189,6 +189,12 @@ export const allRoutes = [
             component: () => import('~/views/admin/apps/ecommerce/products/products/index.vue')
         },
         {
+            path: '/apps/ecommerce/purchases',
+            name: 'apps.ecommerce.purchases',
+            meta: { title: 'Ventes en ligne' },
+            component: () => import('~/views/admin/apps/ecommerce/purchases/index.vue')
+        },
+        {
             path: '/apps/ecommerce/products-grid',
             name: 'apps.ecommerce.products-grid',
             meta: { title: 'Products grid' },

@@ -100,6 +100,12 @@ export const menuItems: MenuItemType[] = [
             'slug': 'pages:apps-ecommerce-transport-suppliers',
             'label': 'Gestion transport',
           },
+          {
+            'url': '/apps/ecommerce/purchases',
+            'icon': 'shopping-bag',
+            'slug': 'pages:apps-ecommerce-purchases',
+            'label': 'Ventes en ligne',
+          },
 
           // {
           //   'url': '/apps/ecommerce/customers',
